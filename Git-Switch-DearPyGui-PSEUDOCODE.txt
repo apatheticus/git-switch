@@ -1,0 +1,214 @@
+# PSEUDOCODE (DearPyGui layout)
+# Goal: structural blueprint for main window + views + profile cards
+
+import dearpygui.dearpygui as dpg
+
+APP_W, APP_H = 900, 600
+SIDEBAR_W = 200
+HEADER_H = 110
+FOOTER_H = 36
+
+TAGS = {
+    "win": "gs_main_window",
+    "view_profiles": "view_profiles",
+    "view_repos": "view_repos",
+    "view_settings": "view_settings",
+    "view_import": "view_import",
+    "content_stack": "content_stack",
+    "active_profile_card": "active_profile_card",
+    "status_ssh": "status_ssh",
+    "status_gpg": "status_gpg",
+}
+
+def theme_init():
+    """
+    Define theme constants:
+      - background/panel colors
+      - cyan glow / hover accents
+      - monospace font for data
+    Implement as dpg.theme + dpg.add_theme_color/style as needed.
+    """
+    pass
+
+def icon(label):  # optional helper
+    return label  # placeholder
+
+def show_view(view_tag: str):
+    # Hide all views, then show requested
+    for t in (TAGS["view_profiles"], TAGS["view_repos"], TAGS["view_settings"], TAGS["view_import"]):
+        dpg.configure_item(t, show=(t == view_tag))
+
+def on_nav_click(sender, app_data, user_data):
+    # user_data contains the view tag to show
+    show_view(user_data)
+
+def on_lock():
+    # lock flow: blur overlay + password modal (implementation detail)
+    pass
+
+def on_apply_profile(profile_id: str, scope: str):
+    # scope in {"GLOBAL", "LOCAL"}; triggers switch workflow + UI status updates
+    pass
+
+def profile_card(parent, *, profile_id, name, email, org=None, is_active=False,
+                 ssh_ok=True, gpg_ok=False, last_used="—"):
+    """
+    Reusable card component. Use a child_window as a "glass" card.
+    Apply cyan glow style when active.
+    """
+    card_h = 92 if org else 84
+    with dpg.child_window(parent=parent, height=card_h, border=False):
+        # Top row: radio/indicator + name + actions (edit/delete could be icons)
+        with dpg.group(horizontal=True):
+            dpg.add_text("◉" if is_active else "○")     # active indicator
+            dpg.add_text(name)
+            dpg.add_spacer(width=8)
+            if is_active:
+                dpg.add_text("ACTIVE")  # style as pill/badge
+
+        # Secondary row: email (monospace)
+        dpg.add_text(email)
+
+        # Optional org line
+        if org:
+            dpg.add_text(org)
+
+        # Meta row: SSH/GPG/Last Used
+        meta = f"SSH {'✔' if ssh_ok else '—'}   GPG {'✔' if gpg_ok else '—'}   LAST USED: {last_used}"
+        dpg.add_text(meta)
+
+        # Action row
+        with dpg.group(horizontal=True):
+            if is_active:
+                dpg.add_button(label="APPLY GLOBAL", callback=lambda: on_apply_profile(profile_id, "GLOBAL"))
+                dpg.add_button(label="APPLY LOCAL",  callback=lambda: on_apply_profile(profile_id, "LOCAL"))
+            else:
+                dpg.add_button(label="SWITCH", callback=lambda: on_apply_profile(profile_id, "GLOBAL"))
+
+def header_section(parent):
+    # Header with logo/title + online status + Active Profile card
+    with dpg.child_window(parent=parent, height=HEADER_H, border=False):
+        with dpg.group(horizontal=True):
+            # Left: logo + title
+            with dpg.group():
+                dpg.add_text("GIT-SWITCH")          # stylize with cyan accent
+                dpg.add_text("Profile Switch Utility")  # optional subtitle
+
+            dpg.add_spacer(width=16)
+
+            # Center: Active profile "card"
+            with dpg.child_window(tag=TAGS["active_profile_card"], width=520, height=HEADER_H-18, border=False):
+                dpg.add_text("ACTIVE PROFILE")
+                dpg.add_text("JOHN DOE  ▸  john@company.com")   # bind to state
+                dpg.add_text("Acme Corporation")
+                dpg.add_text("SSH: ✔   GPG: ✔   Scope: GLOBAL")
+
+            dpg.add_spacer(width=10)
+
+            # Right: online indicator (pill)
+            with dpg.group():
+                dpg.add_text("● ONLINE")  # green dot style
+                # optionally show "Last switch: 2s ago" etc.
+
+def sidebar_section(parent):
+    # Sidebar navigation
+    with dpg.child_window(parent=parent, width=SIDEBAR_W, border=False):
+        dpg.add_text("NAV")
+        dpg.add_separator()
+
+        dpg.add_button(label=f"{icon('📋')} Profiles", callback=on_nav_click, user_data=TAGS["view_profiles"])
+        dpg.add_button(label=f"{icon('📁')} Repositories", callback=on_nav_click, user_data=TAGS["view_repos"])
+        dpg.add_button(label=f"{icon('⚙️')} Settings", callback=on_nav_click, user_data=TAGS["view_settings"])
+        dpg.add_button(label=f"{icon('💾')} Import/Export", callback=on_nav_click, user_data=TAGS["view_import"])
+
+        dpg.add_spacer(height=10)
+        dpg.add_separator()
+        dpg.add_text("Tip: Right-click tray icon to switch quickly.")  # optional
+
+def footer_section(parent):
+    # Status bar: SSH + GPG + Lock
+    with dpg.child_window(parent=parent, height=FOOTER_H, border=False):
+        with dpg.group(horizontal=True):
+            dpg.add_text("SSH: CONNECTED", tag=TAGS["status_ssh"])
+            dpg.add_spacer(width=18)
+            dpg.add_text("GPG: READY", tag=TAGS["status_gpg"])
+            dpg.add_spacer(width=18)
+            dpg.add_text("SCOPE: GLOBAL")  # bind to state
+
+            # right align lock
+            dpg.add_spacer(width=APP_W - SIDEBAR_W - 420)  # pseudocode for alignment
+            dpg.add_button(label="🔒 LOCK", callback=on_lock)
+
+def profiles_view(parent):
+    # Default view with profile list + New Profile action
+    with dpg.child_window(parent=parent, tag=TAGS["view_profiles"], border=False, show=True):
+        with dpg.group(horizontal=True):
+            dpg.add_text("YOUR PROFILES")
+            dpg.add_spacer(width=12)
+            dpg.add_button(label="+ NEW PROFILE", callback=lambda: None)  # open modal
+
+        dpg.add_separator()
+        # profile list container
+        with dpg.child_window(height=-1, border=False):
+            profile_card(dpg.last_item(), profile_id="p1", name="Acme Corporation",
+                         email="john@company.com", org="Acme Corporation",
+                         is_active=True, ssh_ok=True, gpg_ok=True, last_used="2h ago")
+            dpg.add_spacer(height=8)
+            profile_card(dpg.last_item(), profile_id="p2", name="Personal Account",
+                         email="johndoe@gmail.com", org=None,
+                         is_active=False, ssh_ok=True, gpg_ok=False, last_used="yesterday")
+            dpg.add_spacer(height=8)
+            profile_card(dpg.last_item(), profile_id="p3", name="Freelance Client",
+                         email="contractor@client.io", org="Client.io",
+                         is_active=False, ssh_ok=True, gpg_ok=True, last_used="5d ago")
+
+def repos_view(parent):
+    with dpg.child_window(parent=parent, tag=TAGS["view_repos"], border=False, show=False):
+        dpg.add_text("REGISTERED REPOSITORIES")
+        dpg.add_button(label="+ ADD REPOSITORY", callback=lambda: None)
+        dpg.add_separator()
+        # list rows (each row includes repo path, assigned profile dropdown, apply local/global)
+        # implement each row as a child_window or collapsing_header
+
+def settings_view(parent):
+    with dpg.child_window(parent=parent, tag=TAGS["view_settings"], border=False, show=False):
+        dpg.add_text("SETTINGS")
+        dpg.add_separator()
+        # toggles from PRD: start_with_windows, start_minimized, auto_lock_timeout, etc.
+
+def import_export_view(parent):
+    with dpg.child_window(parent=parent, tag=TAGS["view_import"], border=False, show=False):
+        dpg.add_text("IMPORT / EXPORT")
+        dpg.add_separator()
+        # export to .gps, import .gps, merge/replace options
+
+def main_window():
+    theme_init()
+
+    with dpg.window(tag=TAGS["win"], label="GIT-SWITCH", width=APP_W, height=APP_H, no_collapse=True):
+        # Vertical layout: Header, Body (sidebar+content), Footer
+        header_section(parent=TAGS["win"])
+        dpg.add_separator()
+
+        # Body region
+        with dpg.group(horizontal=True):
+            sidebar_section(parent=TAGS["win"])
+
+            # Content stack (views)
+            with dpg.child_window(tag=TAGS["content_stack"], border=False, width=-1, height=APP_H-HEADER_H-FOOTER_H-32):
+                profiles_view(parent=TAGS["content_stack"])
+                repos_view(parent=TAGS["content_stack"])
+                settings_view(parent=TAGS["content_stack"])
+                import_export_view(parent=TAGS["content_stack"])
+
+        dpg.add_separator()
+        footer_section(parent=TAGS["win"])
+
+def run():
+    dpg.create_context()
+    main_window()
+    dpg.create_viewport(title="Git-Switch", width=APP_W+40, height=APP_H+60)
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.start_dearpygui()
+    dpg.destroy_context()
