@@ -37,41 +37,41 @@
 
 ### Exception Hierarchy
 
-- [ ] T008 Create exception hierarchy in src/models/exceptions.py (GitSwitchError, AuthenticationError, InvalidPasswordError, SessionExpiredError, EncryptionError, ProfileError, ProfileNotFoundError, ProfileValidationError, ServiceError, GitServiceError, SSHServiceError, GPGServiceError, CredentialServiceError, RepositoryError, InvalidRepositoryError)
-- [ ] T009 [P] Write unit tests for exception hierarchy in tests/unit/test_exceptions.py
+- [x] T008 Create exception hierarchy in src/models/exceptions.py (GitSwitchError, AuthenticationError, InvalidPasswordError, SessionExpiredError, EncryptionError, ProfileError, ProfileNotFoundError, ProfileValidationError, ServiceError, GitServiceError, SSHServiceError, GPGServiceError, CredentialServiceError, RepositoryError, InvalidRepositoryError)
+- [x] T009 [P] Write unit tests for exception hierarchy in tests/unit/test_exceptions.py
 
 ### Data Models (No Encryption)
 
-- [ ] T010 [P] Create SSHKey dataclass in src/models/profile.py with validation (__post_init__)
-- [ ] T011 [P] Create GPGKey dataclass in src/models/profile.py with validation (__post_init__)
-- [ ] T012 Create Profile dataclass in src/models/profile.py with validation (depends on T010, T011)
-- [ ] T013 [P] Create Repository dataclass in src/models/repository.py with validation and is_valid_git_repo()
-- [ ] T014 [P] Create Settings dataclass in src/models/settings.py with validation
-- [ ] T015 [P] Create MasterKeyConfig dataclass in src/models/settings.py with validation
-- [ ] T016 Create GitSwitchEncoder JSON encoder in src/models/serialization.py for UUID, datetime, Path, bytes
-- [ ] T017 Create src/models/__init__.py exporting all model classes
-- [ ] T018 Write unit tests for all dataclasses in tests/unit/test_models.py (100% coverage per constitution)
+- [x] T010 [P] Create SSHKey dataclass in src/models/profile.py with validation (__post_init__)
+- [x] T011 [P] Create GPGKey dataclass in src/models/profile.py with validation (__post_init__)
+- [x] T012 Create Profile dataclass in src/models/profile.py with validation (depends on T010, T011)
+- [x] T013 [P] Create Repository dataclass in src/models/repository.py with validation and is_valid_git_repo()
+- [x] T014 [P] Create Settings dataclass in src/models/settings.py with validation
+- [x] T015 [P] Create MasterKeyConfig dataclass in src/models/settings.py with validation
+- [x] T016 Create GitSwitchEncoder JSON encoder in src/models/serialization.py for UUID, datetime, Path, bytes
+- [x] T017 Create src/models/__init__.py exporting all model classes
+- [x] T018 Write unit tests for all dataclasses in tests/unit/test_models.py (100% coverage per constitution)
 
 ### Service Protocols
 
-- [ ] T019 Create all Protocol classes in src/services/protocols.py (GitServiceProtocol, SSHServiceProtocol, GPGServiceProtocol, CredentialServiceProtocol)
-- [ ] T020 [P] Create core Protocol classes in src/core/protocols.py (CryptoServiceProtocol, SessionManagerProtocol, ProfileManagerProtocol, RepositoryManagerProtocol)
-- [ ] T021 Create ServiceContainer dataclass in src/services/container.py with create_container() and create_test_container()
+- [x] T019 Create all Protocol classes in src/services/protocols.py (GitServiceProtocol, SSHServiceProtocol, GPGServiceProtocol, CredentialServiceProtocol)
+- [x] T020 [P] Create core Protocol classes in src/core/protocols.py (CryptoServiceProtocol, SessionManagerProtocol, ProfileManagerProtocol, RepositoryManagerProtocol)
+- [x] T021 Create ServiceContainer dataclass in src/services/container.py with create_container() and create_test_container()
 
 ### Utility Modules
 
-- [ ] T022 [P] Create paths.py in src/utils/paths.py with get_app_data_dir(), get_profiles_path(), get_config_path(), etc.
-- [ ] T023 [P] Create windows.py in src/utils/windows.py with Windows-specific helpers
-- [ ] T024 [P] Create notifications.py in src/utils/notifications.py with show_notification() wrapper
-- [ ] T025 Create src/utils/__init__.py exporting utility functions
-- [ ] T026 Write unit tests for utility modules in tests/unit/test_utils.py
+- [x] T022 [P] Create paths.py in src/utils/paths.py with get_app_data_dir(), get_profiles_path(), get_config_path(), etc.
+- [x] T023 [P] Create windows.py in src/utils/windows.py with Windows-specific helpers
+- [x] T024 [P] Create notifications.py in src/utils/notifications.py with show_notification() wrapper
+- [x] T025 Create src/utils/__init__.py exporting utility functions
+- [x] T026 Write unit tests for utility modules in tests/unit/test_utils.py
 
 ### Crypto Service (Security Critical)
 
-- [ ] T027 Write security tests for crypto in tests/security/test_encryption_roundtrip.py (MUST FAIL first)
-- [ ] T028 [P] Write security tests for no plaintext leakage in tests/security/test_no_plaintext_leakage.py (MUST FAIL first)
-- [ ] T029 Implement CryptoService in src/core/crypto.py (derive_key with PBKDF2 100k iterations, encrypt/decrypt with AES-256-GCM, generate_salt, create_verification_hash, verify_password, secure_delete_file, secure_zero helper)
-- [ ] T030 Verify security tests pass after implementation
+- [x] T027 Write security tests for crypto in tests/security/test_encryption_roundtrip.py (MUST FAIL first)
+- [x] T028 [P] Write security tests for no plaintext leakage in tests/security/test_no_plaintext_leakage.py (MUST FAIL first)
+- [x] T029 Implement CryptoService in src/core/crypto.py (derive_key with PBKDF2 100k iterations, encrypt/decrypt with AES-256-GCM, generate_salt, create_verification_hash, verify_password, secure_delete_file, secure_zero helper)
+- [x] T030 Verify security tests pass after implementation
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -85,18 +85,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T031 [P] [US1] Write unit tests for SessionManager in tests/unit/test_session.py (MUST FAIL first)
-- [ ] T032 [P] [US1] Write unit tests for ProfileManager CRUD in tests/unit/test_profile_manager.py (MUST FAIL first)
-- [ ] T033 [P] [US1] Write security tests for authentication edge cases in tests/security/test_authentication_edge_cases.py (MUST FAIL first)
+- [x] T031 [P] [US1] Write unit tests for SessionManager in tests/unit/test_session.py (MUST FAIL first)
+- [x] T032 [P] [US1] Write unit tests for ProfileManager CRUD in tests/unit/test_profile_manager.py (MUST FAIL first)
+- [x] T033 [P] [US1] Write security tests for authentication edge cases in tests/security/test_authentication_edge_cases.py (MUST FAIL first)
 
 ### Implementation for User Story 1
 
-- [ ] T034 [US1] Implement SessionManager in src/core/session.py (unlock, lock, setup_master_password, change_master_password, reset_idle_timer, auto-lock timer, has_master_password)
-- [ ] T035 [US1] Implement ProfileManager CRUD in src/core/profile_manager.py (list_profiles, get_profile, create_profile, update_profile, delete_profile - without switch logic)
-- [ ] T036 [US1] Implement profile storage file format (profiles.dat) with encrypt/decrypt in ProfileManager
-- [ ] T037 [US1] Implement SSH key storage in keys/{profile_id}.ssh with encryption
-- [ ] T038 [US1] Implement GPG key storage in keys/{profile_id}.gpg with encryption (optional, if GPG enabled)
-- [ ] T039 [US1] Verify all US1 tests pass
+- [x] T034 [US1] Implement SessionManager in src/core/session.py (unlock, lock, setup_master_password, change_master_password, reset_idle_timer, auto-lock timer, has_master_password)
+- [x] T035 [US1] Implement ProfileManager CRUD in src/core/profile_manager.py (list_profiles, get_profile, create_profile, update_profile, delete_profile - without switch logic)
+- [x] T036 [US1] Implement profile storage file format (profiles.dat) with encrypt/decrypt in ProfileManager
+- [x] T037 [US1] Implement SSH key storage in keys/{profile_id}.ssh with encryption
+- [x] T038 [US1] Implement GPG key storage in keys/{profile_id}.gpg with encryption (optional, if GPG enabled)
+- [x] T039 [US1] Verify all US1 tests pass
 
 **Checkpoint**: User Story 1 complete - profiles can be created and stored securely
 
