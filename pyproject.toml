@@ -154,6 +154,8 @@ ignore = [
     "S101",   # Use of assert in tests is expected
     "ARG",    # Unused function args (fixtures)
     "PLR2004", # Magic values in tests are fine
+    "S607",   # Partial executable paths OK in tests (e.g., "git")
+    "TC003",  # Runtime imports needed for fixtures
 ]
 
 [tool.coverage.run]

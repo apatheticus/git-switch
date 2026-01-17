@@ -18,6 +18,7 @@ from src.core.protocols import (
     RepositoryManagerProtocol,
     SessionManagerProtocol,
 )
+from src.core.repository_manager import RepositoryManager
 from src.core.settings_manager import SettingsManager
 
 __all__ = [
@@ -32,6 +33,8 @@ __all__ = [
     "ProfileManagerProtocol",
     "RepositoryManagerProtocol",
     "SessionManagerProtocol",
+    # Repository
+    "RepositoryManager",
     # Settings
     "SettingsManager",
     "secure_zero",

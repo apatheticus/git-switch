@@ -183,17 +183,17 @@
 
 ### Tests for User Story 5
 
-- [ ] T065 [P] [US5] Write unit tests for RepositoryManager in tests/unit/test_repository_manager.py (MUST FAIL first)
-- [ ] T066 [P] [US5] Write integration tests for local config in tests/integration/test_local_config.py (MUST FAIL first)
+- [x] T065 [P] [US5] Write unit tests for RepositoryManager in tests/unit/test_repository_manager.py (MUST FAIL first)
+- [x] T066 [P] [US5] Write integration tests for local config in tests/integration/test_local_config.py (MUST FAIL first)
 
 ### Implementation for User Story 5
 
-- [ ] T067 [US5] Implement RepositoryManager in src/core/repository_manager.py (list_repositories, get_repository, add_repository, remove_repository, assign_profile, apply_profile, validate_repository)
-- [ ] T068 [US5] Implement repository storage in repositories.json
-- [ ] T069 [US5] Enhance ProfileManager.switch_profile to support scope="local" with repo_path
-- [ ] T070 [US5] Verify all US5 tests pass
+- [x] T067 [US5] Implement RepositoryManager in src/core/repository_manager.py (list_repositories, get_repository, add_repository, remove_repository, assign_profile, apply_profile, validate_repository)
+- [x] T068 [US5] Implement repository storage in repositories.json
+- [x] T069 [US5] Enhance ProfileManager.switch_profile to support scope="local" with repo_path
+- [x] T070 [US5] Verify all US5 tests pass
 
-**Checkpoint**: User Story 5 complete - repositories can have per-repo profiles
+**Checkpoint**: User Story 5 complete - repositories can have per-repo profiles ✓
 
 ---
 
