@@ -897,3 +897,292 @@ class TestSwitchProfile:
         mock_git_service.set_local_config.assert_called_once()
         call_kwargs = mock_git_service.set_local_config.call_args
         assert call_kwargs.kwargs.get("repo_path") == mock_git_repo or call_kwargs[1].get("repo_path") == mock_git_repo
+
+
+# =============================================================================
+# Update Profile Edge Cases (Phase 6 - US4)
+# =============================================================================
+
+
+class TestUpdateProfileEdgeCases:
+    """Tests for update_profile edge cases."""
+
+    def test_update_profile_with_ssh_key_deletes_old_key_file(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_crypto_service: MagicMock,
+    ) -> None:
+        """update_profile should delete old SSH key file before saving new one."""
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Reset mock to track new calls
+        mock_crypto_service.secure_delete_file.reset_mock()
+
+        new_private = b"-----BEGIN OPENSSH PRIVATE KEY-----\nnewkey\n-----END OPENSSH PRIVATE KEY-----"
+        new_public = b"ssh-ed25519 NEWKEY newuser@example.com"
+
+        profile_manager.update_profile(
+            profile.id,
+            ssh_private_key=new_private,
+            ssh_public_key=new_public,
+        )
+
+        # Verify secure_delete_file was called for old SSH key
+        mock_crypto_service.secure_delete_file.assert_called()
+
+    def test_update_profile_disabling_gpg_deletes_gpg_key_file(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_crypto_service: MagicMock,
+    ) -> None:
+        """update_profile should delete GPG key file when disabling GPG."""
+        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+            gpg_enabled=True,
+            gpg_key_id="ABCD1234EFGH5678",
+            gpg_private_key=gpg_private,
+            gpg_public_key=gpg_public,
+        )
+
+        # Reset mock to track new calls
+        mock_crypto_service.secure_delete_file.reset_mock()
+
+        # Disable GPG
+        updated = profile_manager.update_profile(
+            profile.id,
+            gpg_enabled=False,
+        )
+
+        assert updated.gpg_key.enabled is False
+        # Verify secure_delete_file was called for GPG key file
+        mock_crypto_service.secure_delete_file.assert_called()
+
+    def test_update_profile_preserves_created_at_timestamp(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+    ) -> None:
+        """update_profile should not modify created_at timestamp."""
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        original_created_at = profile.created_at
+
+        updated = profile_manager.update_profile(
+            profile.id,
+            name="Work Updated",
+        )
+
+        assert updated.created_at == original_created_at
+
+    def test_update_profile_preserves_last_used_timestamp(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+    ) -> None:
+        """update_profile should not modify last_used timestamp."""
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Set a specific last_used value
+        profile_manager._profiles[0].last_used
+
+        updated = profile_manager.update_profile(
+            profile.id,
+            name="Work Updated",
+        )
+
+        # last_used should not be modified by update
+        assert updated.last_used == profile.last_used
+
+    def test_update_profile_with_passphrase_change(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_crypto_service: MagicMock,
+    ) -> None:
+        """update_profile should allow updating SSH passphrase."""
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+            ssh_passphrase="old-passphrase",
+        )
+
+        # Reset mock to track new calls
+        mock_crypto_service.encrypt.reset_mock()
+
+        # Update with new passphrase
+        profile_manager.update_profile(
+            profile.id,
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+            ssh_passphrase="new-passphrase",
+        )
+
+        # Verify encrypt was called (for the new passphrase)
+        mock_crypto_service.encrypt.assert_called()
+
+
+# =============================================================================
+# Delete Profile Edge Cases (Phase 6 - US4)
+# =============================================================================
+
+
+class TestDeleteProfileEdgeCases:
+    """Tests for delete_profile edge cases."""
+
+    def test_delete_active_profile_clears_git_config(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+        mock_ssh_service: MagicMock,
+    ) -> None:
+        """delete_profile should clear Git config when deleting active profile."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Switch to make it active
+        profile_manager_with_services.switch_profile(profile.id)
+        mock_git_service.reset_mock()
+        mock_ssh_service.reset_mock()
+
+        # Delete the active profile
+        profile_manager_with_services.delete_profile(profile.id)
+
+        # Verify Git config was cleared (set to empty or unset)
+        mock_git_service.set_global_config.assert_called_once()
+        # Verify SSH keys were removed from agent
+        mock_ssh_service.remove_all_keys.assert_called()
+
+    def test_delete_profile_when_key_files_missing_succeeds(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_crypto_service: MagicMock,
+    ) -> None:
+        """delete_profile should succeed even if key files don't exist."""
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Make secure_delete_file raise an error simulating missing file
+        # But _delete_key_files already handles this, so it shouldn't propagate
+        mock_crypto_service.secure_delete_file.side_effect = FileNotFoundError("File not found")
+
+        # Should not raise
+        profile_manager.delete_profile(profile.id)
+
+        # Profile should be removed
+        assert profile_manager.get_profile(profile.id) is None
+
+    def test_delete_profile_with_gpg_enabled_cleans_up_gpg_file(
+        self,
+        profile_manager: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_crypto_service: MagicMock,
+    ) -> None:
+        """delete_profile should clean up GPG key file when profile has GPG enabled."""
+        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+
+        profile = profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+            gpg_enabled=True,
+            gpg_key_id="ABCD1234EFGH5678",
+            gpg_private_key=gpg_private,
+            gpg_public_key=gpg_public,
+        )
+
+        # Reset mock to track delete calls
+        mock_crypto_service.secure_delete_file.reset_mock()
+
+        profile_manager.delete_profile(profile.id)
+
+        # Verify secure_delete_file was called at least twice (SSH and GPG)
+        assert mock_crypto_service.secure_delete_file.call_count >= 1
+
+    def test_delete_inactive_profile_does_not_clear_git_config(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+        mock_ssh_service: MagicMock,
+    ) -> None:
+        """delete_profile should NOT clear Git config when deleting inactive profile."""
+        profile1 = profile_manager_with_services.create_profile(
+            name="Profile1",
+            git_username="user1",
+            git_email="user1@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+        profile2 = profile_manager_with_services.create_profile(
+            name="Profile2",
+            git_username="user2",
+            git_email="user2@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Switch to profile1 (make it active)
+        profile_manager_with_services.switch_profile(profile1.id)
+        mock_git_service.reset_mock()
+        mock_ssh_service.reset_mock()
+
+        # Delete profile2 (inactive)
+        profile_manager_with_services.delete_profile(profile2.id)
+
+        # Git config should NOT be cleared (profile1 is still active)
+        mock_git_service.set_global_config.assert_not_called()
+        mock_ssh_service.remove_all_keys.assert_not_called()

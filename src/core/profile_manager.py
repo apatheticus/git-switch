@@ -406,14 +406,44 @@ class ProfileManager:
         Args:
             profile_id: Profile UUID.
         """
+        self._delete_ssh_key_file(profile_id)
+        self._delete_gpg_key_file(profile_id)
+
+    def _delete_ssh_key_file(self, profile_id: UUID) -> None:
+        """Delete SSH key file for a profile.
+
+        Args:
+            profile_id: Profile UUID.
+
+        Note:
+            Silently handles missing files or deletion errors to ensure
+            profile deletion succeeds even if key cleanup fails.
+        """
         ssh_path = get_ssh_key_path(str(profile_id))
-        gpg_path = get_gpg_key_path(str(profile_id))
 
         if ssh_path.exists():
-            self._crypto.secure_delete_file(ssh_path)
+            try:
+                self._crypto.secure_delete_file(ssh_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete SSH key file: {e}")
+
+    def _delete_gpg_key_file(self, profile_id: UUID) -> None:
+        """Delete GPG key file for a profile.
+
+        Args:
+            profile_id: Profile UUID.
+
+        Note:
+            Silently handles missing files or deletion errors to ensure
+            profile deletion succeeds even if key cleanup fails.
+        """
+        gpg_path = get_gpg_key_path(str(profile_id))
 
         if gpg_path.exists():
-            self._crypto.secure_delete_file(gpg_path)
+            try:
+                self._crypto.secure_delete_file(gpg_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete GPG key file: {e}")
 
     def list_profiles(self) -> list[Profile]:
         """Get all profiles.
@@ -597,6 +627,9 @@ class ProfileManager:
         ssh_passphrase = kwargs.pop("ssh_passphrase", None)
 
         if ssh_private_key is not None and ssh_public_key is not None:
+            # Delete old SSH key file before saving new one
+            self._delete_ssh_key_file(profile_id)
+
             ssh_key = SSHKey(
                 private_key_encrypted=ssh_private_key,
                 public_key=ssh_public_key,
@@ -625,6 +658,9 @@ class ProfileManager:
                 )
                 self._save_gpg_key(profile_id, gpg_private_key, gpg_public_key)
             else:
+                # Delete GPG key file when disabling GPG
+                if old_profile.gpg_key.enabled:
+                    self._delete_gpg_key_file(profile_id)
                 gpg_key = GPGKey(enabled=False)
 
         # Create updated profile
@@ -672,6 +708,12 @@ class ProfileManager:
 
         if profile_idx is None:
             raise ProfileNotFoundError(f"Profile not found: {profile_id}")
+
+        profile = self._profiles[profile_idx]
+
+        # If deleting active profile, clear Git config and SSH agent
+        if profile.is_active:
+            self._clear_active_profile_state()
 
         # Delete key files
         self._delete_key_files(profile_id)
@@ -824,6 +866,33 @@ class ProfileManager:
                     last_used=p.last_used,
                     is_active=False,
                 )
+
+    def _clear_active_profile_state(self) -> None:
+        """Clear Git config and SSH agent when deleting active profile.
+
+        This is called when the active profile is being deleted to clean up
+        the Git configuration and SSH agent state.
+        """
+        # Clear global Git config
+        if self._git_service:
+            try:
+                self._git_service.set_global_config(
+                    username="",
+                    email="",
+                    signing_key=None,
+                    gpg_sign=False,
+                )
+                logger.info("Cleared global Git config for deleted active profile")
+            except Exception as e:
+                logger.warning(f"Failed to clear Git config: {e}")
+
+        # Remove all keys from SSH agent
+        if self._ssh_service:
+            try:
+                self._ssh_service.remove_all_keys()
+                logger.info("Removed SSH keys from agent for deleted active profile")
+            except Exception as e:
+                logger.warning(f"Failed to remove SSH keys from agent: {e}")
 
     def _decrypt_ssh_key(self, profile_id: UUID, ssh_key: SSHKey) -> bytes | None:
         """Decrypt the SSH private key from storage.

@@ -155,7 +155,7 @@
 
 ---
 
-## Phase 6: User Story 4 - Manage Profiles (Priority: P2)
+## Phase 6: User Story 4 - Manage Profiles (Priority: P2) COMPLETE
 
 **Goal**: Edit existing profiles, delete profiles with confirmation
 
@@ -163,13 +163,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T061 [P] [US4] Write unit tests for profile update/delete edge cases in tests/unit/test_profile_manager.py (append, MUST FAIL first)
+- [x] T061 [P] [US4] Write unit tests for profile update/delete edge cases in tests/unit/test_profile_manager.py (append, MUST FAIL first)
 
 ### Implementation for User Story 4
 
-- [ ] T062 [US4] Enhance ProfileManager.update_profile to handle SSH key replacement
-- [ ] T063 [US4] Enhance ProfileManager.delete_profile to clean up key files and handle active profile deletion
-- [ ] T064 [US4] Verify all US4 tests pass
+- [x] T062 [US4] Enhance ProfileManager.update_profile to handle SSH key replacement
+- [x] T063 [US4] Enhance ProfileManager.delete_profile to clean up key files and handle active profile deletion
+- [x] T064 [US4] Verify all US4 tests pass
 
 **Checkpoint**: User Story 4 complete - profiles can be edited and deleted
 
