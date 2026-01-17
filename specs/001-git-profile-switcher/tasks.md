@@ -102,7 +102,7 @@
 
 ---
 
-## Phase 4: User Story 2 - Switch Git Profile Globally (Priority: P1)
+## Phase 4: User Story 2 - Switch Git Profile Globally (Priority: P1) COMPLETE
 
 **Goal**: Apply a profile globally - update Git config, clear credentials, load SSH key into agent
 
@@ -110,23 +110,23 @@
 
 ### Tests for User Story 2
 
-- [ ] T040 [P] [US2] Write unit tests for GitService in tests/unit/test_git_service.py (MUST FAIL first)
-- [ ] T041 [P] [US2] Write unit tests for SSHService in tests/unit/test_ssh_service.py (MUST FAIL first)
-- [ ] T042 [P] [US2] Write unit tests for CredentialService in tests/unit/test_credential_service.py (MUST FAIL first)
-- [ ] T043 [P] [US2] Write unit tests for GPGService in tests/unit/test_gpg_service.py (MUST FAIL first)
-- [ ] T044 [P] [US2] Write unit tests for ProfileManager.switch_profile in tests/unit/test_profile_manager.py (append to existing)
-- [ ] T045 [P] [US2] Write integration tests for profile switch in tests/integration/test_profile_switch.py (MUST FAIL first)
+- [x] T040 [P] [US2] Write unit tests for GitService in tests/unit/test_git_service.py (MUST FAIL first)
+- [x] T041 [P] [US2] Write unit tests for SSHService in tests/unit/test_ssh_service.py (MUST FAIL first)
+- [x] T042 [P] [US2] Write unit tests for CredentialService in tests/unit/test_credential_service.py (MUST FAIL first)
+- [x] T043 [P] [US2] Write unit tests for GPGService in tests/unit/test_gpg_service.py (MUST FAIL first)
+- [x] T044 [P] [US2] Write unit tests for ProfileManager.switch_profile in tests/unit/test_profile_manager.py (append to existing)
+- [x] T045 [P] [US2] Write integration tests for profile switch in tests/integration/test_profile_switch.py (MUST FAIL first)
 
 ### Implementation for User Story 2
 
-- [ ] T046 [US2] Implement GitService in src/services/git_service.py (is_git_installed, get_global_config, set_global_config, get_local_config, set_local_config)
-- [ ] T047 [US2] Implement SSHService in src/services/ssh_service.py (is_agent_running, start_agent, list_keys, add_key, remove_all_keys, test_connection, get_key_fingerprint, validate_private_key)
-- [ ] T048 [US2] Implement CredentialService in src/services/credential_service.py (list_git_credentials, delete_credential, clear_git_credentials, has_credential)
-- [ ] T049 [US2] Implement GPGService in src/services/gpg_service.py (is_gpg_installed, list_keys, import_key, export_key, delete_key, verify_signing_capability, validate_key)
-- [ ] T050 [US2] Create src/services/__init__.py exporting all services
-- [ ] T051 [US2] Implement ProfileManager.switch_profile in src/core/profile_manager.py (global scope: update git config, clear credentials, update ssh-agent, update GPG if enabled)
-- [ ] T052 [US2] Integrate with notifications (show_notification on switch complete)
-- [ ] T053 [US2] Verify all US2 tests pass
+- [x] T046 [US2] Implement GitService in src/services/git_service.py (is_git_installed, get_global_config, set_global_config, get_local_config, set_local_config)
+- [x] T047 [US2] Implement SSHService in src/services/ssh_service.py (is_agent_running, start_agent, list_keys, add_key, remove_all_keys, test_connection, get_key_fingerprint, validate_private_key)
+- [x] T048 [US2] Implement CredentialService in src/services/credential_service.py (list_git_credentials, delete_credential, clear_git_credentials, has_credential)
+- [x] T049 [US2] Implement GPGService in src/services/gpg_service.py (is_gpg_installed, list_keys, import_key, export_key, delete_key, verify_signing_capability, validate_key)
+- [x] T050 [US2] Create src/services/__init__.py exporting all services
+- [x] T051 [US2] Implement ProfileManager.switch_profile in src/core/profile_manager.py (global scope: update git config, clear credentials, update ssh-agent, update GPG if enabled)
+- [x] T052 [US2] Integrate with notifications (show_notification on switch complete)
+- [x] T053 [US2] Verify all US2 tests pass
 
 **Checkpoint**: User Story 2 complete - profiles can be switched globally
 
