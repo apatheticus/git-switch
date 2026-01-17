@@ -96,7 +96,7 @@ def create_main_window(container: ServiceContainer) -> int:
             )
 
             # Content area
-            _build_content_area(content_height)
+            _build_content_area(content_height, container)
 
         # Footer section
         dpg.add_separator()
@@ -253,12 +253,20 @@ def _build_sidebar() -> None:
         )
 
 
-def _build_content_area(height: int) -> None:
-    """Build the main content area with view placeholders.
+def _build_content_area(height: int, container: ServiceContainer) -> None:
+    """Build the main content area with views.
 
     Args:
         height: Available height for content area.
+        container: Service container for views to access managers.
     """
+    from src.ui.views import (
+        create_import_export_view,
+        create_profiles_view,
+        create_repositories_view,
+        create_settings_view,
+    )
+
     content_width = APP_WIDTH - SIDEBAR_WIDTH - PADDING_LARGE * 2
 
     with dpg.child_window(
@@ -268,89 +276,11 @@ def _build_content_area(height: int) -> None:
         border=False,
         no_scrollbar=False,
     ):
-        # Profiles view (default view)
-        with dpg.group(tag=TAGS["view_profiles"], show=True):
-            dpg.add_text(
-                "PROFILES",
-                color=COLORS["accent_cyan"],
-            )
-            dpg.add_separator()
-            dpg.add_spacer(height=PADDING_LARGE)
-            dpg.add_text(
-                "Profile management will be implemented in T097.",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "This view will display a list of configured profiles",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "with options to add, edit, delete, and switch profiles.",
-                color=COLORS["text_secondary"],
-            )
-
-        # Repositories view
-        with dpg.group(tag=TAGS["view_repos"], show=False):
-            dpg.add_text(
-                "REPOSITORIES",
-                color=COLORS["accent_cyan"],
-            )
-            dpg.add_separator()
-            dpg.add_spacer(height=PADDING_LARGE)
-            dpg.add_text(
-                "Repository management will be implemented in T098.",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "This view will display registered repositories",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "with profile assignment options.",
-                color=COLORS["text_secondary"],
-            )
-
-        # Settings view
-        with dpg.group(tag=TAGS["view_settings"], show=False):
-            dpg.add_text(
-                "SETTINGS",
-                color=COLORS["accent_cyan"],
-            )
-            dpg.add_separator()
-            dpg.add_spacer(height=PADDING_LARGE)
-            dpg.add_text(
-                "Settings management will be implemented in T099.",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "This view will include auto-lock timer,",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "master password change, and application preferences.",
-                color=COLORS["text_secondary"],
-            )
-
-        # Import/Export view
-        with dpg.group(tag=TAGS["view_import"], show=False):
-            dpg.add_text(
-                "IMPORT / EXPORT",
-                color=COLORS["accent_cyan"],
-            )
-            dpg.add_separator()
-            dpg.add_spacer(height=PADDING_LARGE)
-            dpg.add_text(
-                "Import/Export functionality will be implemented in T100.",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "This view will allow exporting profiles",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "and importing from backup files.",
-                color=COLORS["text_secondary"],
-            )
+        # Create all views - they manage their own visibility
+        create_profiles_view(container)
+        create_repositories_view(container)
+        create_settings_view(container)
+        create_import_export_view(container)
 
 
 def _build_footer(container: ServiceContainer) -> None:

@@ -66,6 +66,7 @@ class GitSwitchApp:
         self._tray_icon: SystemTrayIcon | None = None
         self._is_running = False
         self._theme_id: int | None = None
+        self._last_mouse_pos: tuple[float, float] = (0.0, 0.0)
 
         logger.debug("GitSwitchApp initialized")
 
@@ -130,12 +131,38 @@ class GitSwitchApp:
         """Frame callback for activity tracking.
 
         Called once per frame, resets the session idle timer
-        when user activity is detected.
+        when user activity is detected. Tracks mouse movement,
+        mouse clicks, and keyboard activity.
         """
-        # Check for user input activity
+        activity_detected = False
+
+        # Check for mouse click activity
         if dpg.is_mouse_button_down(dpg.mvMouseButton_Left) or \
            dpg.is_mouse_button_down(dpg.mvMouseButton_Right) or \
-           dpg.is_key_down(dpg.mvKey_Return):
+           dpg.is_mouse_button_down(dpg.mvMouseButton_Middle):
+            activity_detected = True
+
+        # Check for keyboard activity - common keys
+        keys_to_check = [
+            dpg.mvKey_Return, dpg.mvKey_Escape, dpg.mvKey_Tab,
+            dpg.mvKey_Spacebar, dpg.mvKey_Back, dpg.mvKey_Delete,
+            dpg.mvKey_Up, dpg.mvKey_Down, dpg.mvKey_Left, dpg.mvKey_Right,
+        ]
+        for key in keys_to_check:
+            if dpg.is_key_down(key):
+                activity_detected = True
+                break
+
+        # Check for mouse movement by comparing position
+        if not activity_detected:
+            mouse_pos = dpg.get_mouse_pos()
+            if hasattr(self, "_last_mouse_pos"):
+                if mouse_pos != self._last_mouse_pos:
+                    activity_detected = True
+            self._last_mouse_pos = mouse_pos
+
+        # Reset idle timer on any activity
+        if activity_detected:
             self._session.reset_idle_timer()
 
         # Re-register for next frame

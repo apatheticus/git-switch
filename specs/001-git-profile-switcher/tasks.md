@@ -273,32 +273,32 @@
 
 ### Dialogs
 
-- [ ] T090 [P] Implement password dialog in src/ui/dialogs/password_dialog.py (master password entry, first-time setup)
-- [ ] T091 [P] Implement profile dialog in src/ui/dialogs/profile_dialog.py (create/edit profile form with SSH/GPG fields)
-- [ ] T092 [P] Implement confirm dialog in src/ui/dialogs/confirm_dialog.py (generic yes/no modal)
-- [ ] T093 Create src/ui/dialogs/__init__.py exporting dialogs
+- [x] T090 [P] Implement password dialog in src/ui/dialogs/password_dialog.py (master password entry, first-time setup)
+- [x] T091 [P] Implement profile dialog in src/ui/dialogs/profile_dialog.py (create/edit profile form with SSH/GPG fields)
+- [x] T092 [P] Implement confirm dialog in src/ui/dialogs/confirm_dialog.py (generic yes/no modal)
+- [x] T093 Create src/ui/dialogs/__init__.py exporting dialogs
 
 ### Components
 
-- [ ] T094 [P] Implement profile card widget in src/ui/components/profile_card.py (display profile info, switch/edit/delete buttons)
-- [ ] T095 [P] Implement status bar in src/ui/components/status_bar.py (SSH status, GPG status, active profile)
-- [ ] T096 Create src/ui/components/__init__.py exporting components
+- [x] T094 [P] Implement profile card widget in src/ui/components/profile_card.py (display profile info, switch/edit/delete buttons)
+- [x] T095 [P] Implement status bar in src/ui/components/status_bar.py (SSH status, GPG status, active profile)
+- [x] T096 Create src/ui/components/__init__.py exporting components
 
 ### Views
 
-- [ ] T097 Implement profiles view in src/ui/views/profiles_view.py (profile list with cards, New Profile button)
-- [ ] T098 Implement repositories view in src/ui/views/repositories_view.py (repository list, add/remove, profile assignment)
-- [ ] T099 Implement settings view in src/ui/views/settings_view.py (all settings from Settings dataclass)
-- [ ] T100 Implement import/export view in src/ui/views/import_export_view.py (export button, import button with options)
-- [ ] T101 Create src/ui/views/__init__.py exporting views
+- [x] T097 Implement profiles view in src/ui/views/profiles_view.py (profile list with cards, New Profile button)
+- [x] T098 Implement repositories view in src/ui/views/repositories_view.py (repository list, add/remove, profile assignment)
+- [x] T099 Implement settings view in src/ui/views/settings_view.py (all settings from Settings dataclass)
+- [x] T100 Implement import/export view in src/ui/views/import_export_view.py (export button, import button with options)
+- [x] T101 Create src/ui/views/__init__.py exporting views
 
 ### Integration
 
-- [ ] T102 Wire views to navigation in main_window.py
-- [ ] T103 Connect UI to ServiceContainer (inject services via controller)
-- [ ] T104 Implement idle activity tracking for auto-lock (reset timer on user input)
+- [x] T102 Wire views to navigation in main_window.py
+- [x] T103 Connect UI to ServiceContainer (inject services via controller)
+- [x] T104 Implement idle activity tracking for auto-lock (reset timer on user input)
 - [x] T105 Create src/ui/__init__.py exporting app module
-- [ ] T106 Create application entry point in src/main.py
+- [x] T106 Create application entry point in src/main.py
 
 ---
 
