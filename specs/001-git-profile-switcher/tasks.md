@@ -132,7 +132,7 @@
 
 ---
 
-## Phase 5: User Story 3 - Secure Application Access (Priority: P1)
+## Phase 5: User Story 3 - Secure Application Access (Priority: P1) COMPLETE
 
 **Goal**: Protect profiles with master password, auto-lock on idle, lock on demand
 
@@ -140,16 +140,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T054 [P] [US3] Write unit tests for idle timer in tests/unit/test_session.py (append to existing, MUST FAIL first)
-- [ ] T055 [P] [US3] Write e2e test for password workflow in tests/e2e/test_password_workflow.py (MUST FAIL first)
+- [x] T054 [P] [US3] Write unit tests for idle timer in tests/unit/test_session.py (append to existing, MUST FAIL first)
+- [x] T055 [P] [US3] Write e2e test for password workflow in tests/e2e/test_password_workflow.py (MUST FAIL first)
 
 ### Implementation for User Story 3
 
-- [ ] T056 [US3] Implement auto-lock timer in SessionManager (configurable timeout from Settings)
-- [ ] T057 [US3] Implement lock callback mechanism for UI notification
-- [ ] T058 [US3] Implement secure memory clearing on lock (zero encryption key using secure_zero)
-- [ ] T059 [US3] Load Settings from config.json with auto_lock_timeout
-- [ ] T060 [US3] Verify all US3 tests pass
+- [x] T056 [US3] Implement auto-lock timer in SessionManager (configurable timeout from Settings)
+- [x] T057 [US3] Implement lock callback mechanism for UI notification
+- [x] T058 [US3] Implement secure memory clearing on lock (zero encryption key using secure_zero)
+- [x] T059 [US3] Load Settings from config.json with auto_lock_timeout
+- [x] T060 [US3] Verify all US3 tests pass
 
 **Checkpoint**: User Story 3 complete - application access is secured
 

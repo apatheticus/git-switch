@@ -303,6 +303,264 @@ class TestIdleTimer:
 
 
 # =============================================================================
+# Auto-Lock Timer Behavior Tests (T054)
+# =============================================================================
+
+
+class TestAutoLockTimer:
+    """Tests for auto-lock timer behavior."""
+
+    @pytest.fixture
+    def fast_lock_manager(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> "SessionManager":
+        """Create a SessionManager with very short auto-lock timeout for testing."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        # Create master.json with stored password config
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            # Use fractional minutes for quick testing (1/1200 min = 0.05s)
+            manager = SessionManager(crypto_service, auto_lock_timeout=1)
+            # Override the timeout to seconds directly for testing
+            manager._auto_lock_timeout = 1  # Will be 60 seconds, we'll patch _start_auto_lock_timer
+            yield manager
+
+    def test_auto_lock_triggers_after_timeout(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> None:
+        """Timer should lock session after timeout expires."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        # Create master.json
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+        crypto_service.verify_password.return_value = True
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            # Create manager with 1 minute timeout
+            manager = SessionManager(crypto_service, auto_lock_timeout=1)
+
+            # Patch to use 0.05 second timeout instead of 60 seconds
+            original_start = manager._start_auto_lock_timer
+
+            def fast_timer() -> None:
+                if manager._auto_lock_timeout <= 0:
+                    return
+                manager._stop_auto_lock_timer()
+                manager._auto_lock_timer = threading.Timer(0.05, manager._on_auto_lock_timeout)
+                manager._auto_lock_timer.daemon = True
+                manager._auto_lock_timer.start()
+
+            manager._start_auto_lock_timer = fast_timer
+
+            manager.unlock("Password!")
+            assert manager.is_unlocked is True
+
+            # Wait for auto-lock to trigger
+            time.sleep(0.15)
+
+            assert manager.is_unlocked is False
+
+    def test_auto_lock_disabled_when_timeout_zero(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> None:
+        """Timer should not start when auto_lock_timeout=0."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+        crypto_service.verify_password.return_value = True
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            # Create manager with disabled auto-lock
+            manager = SessionManager(crypto_service, auto_lock_timeout=0)
+
+            manager.unlock("Password!")
+            assert manager.is_unlocked is True
+            assert manager._auto_lock_timer is None
+
+            # Wait a bit to confirm no lock occurs
+            time.sleep(0.1)
+            assert manager.is_unlocked is True
+
+    def test_reset_idle_timer_restarts_countdown(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> None:
+        """reset_idle_timer should restart the countdown."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+        crypto_service.verify_password.return_value = True
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            manager = SessionManager(crypto_service, auto_lock_timeout=1)
+
+            # Use fast timer
+            def fast_timer() -> None:
+                if manager._auto_lock_timeout <= 0:
+                    return
+                manager._stop_auto_lock_timer()
+                manager._auto_lock_timer = threading.Timer(0.1, manager._on_auto_lock_timeout)
+                manager._auto_lock_timer.daemon = True
+                manager._auto_lock_timer.start()
+
+            manager._start_auto_lock_timer = fast_timer
+
+            manager.unlock("Password!")
+
+            # Wait part of the timeout
+            time.sleep(0.05)
+            assert manager.is_unlocked is True
+
+            # Reset the timer
+            manager.reset_idle_timer()
+
+            # Wait another partial timeout - should not lock yet
+            time.sleep(0.05)
+            assert manager.is_unlocked is True
+
+            # Now wait for full timeout after reset
+            time.sleep(0.1)
+            assert manager.is_unlocked is False
+
+    def test_lock_cancels_timer(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> None:
+        """Manual lock should cancel the auto-lock timer."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+        crypto_service.verify_password.return_value = True
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            manager = SessionManager(crypto_service, auto_lock_timeout=1)
+
+            manager.unlock("Password!")
+            assert manager._auto_lock_timer is not None
+
+            # Manual lock
+            manager.lock()
+
+            # Timer should be cancelled
+            assert manager._auto_lock_timer is None
+
+    def test_callback_invoked_on_auto_lock(
+        self, crypto_service: MagicMock, temp_dir: Path
+    ) -> None:
+        """Lock callback should be called when auto-lock triggers."""
+        import base64
+
+        from src.core.session import SessionManager
+
+        master_path = temp_dir / "master.json"
+        salt_bytes = b"S" * 32
+        hash_bytes = b"H" * 32
+        master_config = {
+            "salt": base64.b64encode(salt_bytes).decode("ascii"),
+            "verification_hash": base64.b64encode(hash_bytes).decode("ascii"),
+            "iterations": 100000,
+        }
+        master_path.write_text(json.dumps(master_config))
+        crypto_service.verify_password.return_value = True
+
+        callback_invoked = []
+
+        def on_lock() -> None:
+            callback_invoked.append(True)
+
+        with patch("src.core.session.get_master_key_path") as mock_path:
+            mock_path.return_value = master_path
+            manager = SessionManager(crypto_service, auto_lock_timeout=1)
+
+            # Use fast timer
+            def fast_timer() -> None:
+                if manager._auto_lock_timeout <= 0:
+                    return
+                manager._stop_auto_lock_timer()
+                manager._auto_lock_timer = threading.Timer(0.05, manager._on_auto_lock_timeout)
+                manager._auto_lock_timer.daemon = True
+                manager._auto_lock_timer.start()
+
+            manager._start_auto_lock_timer = fast_timer
+            manager.set_lock_callback(on_lock)
+
+            manager.unlock("Password!")
+
+            # Wait for auto-lock
+            time.sleep(0.15)
+
+            assert len(callback_invoked) == 1
+
+    def test_timer_not_started_when_locked(
+        self, session_manager_with_password: "SessionManager"
+    ) -> None:
+        """Timer operations should be no-op when session is locked."""
+        # Session is locked (not unlocked yet)
+        assert session_manager_with_password.is_unlocked is False
+
+        # reset_idle_timer should be safe to call
+        session_manager_with_password.reset_idle_timer()
+
+        # Timer should not be started
+        assert session_manager_with_password._auto_lock_timer is None
+
+
+# =============================================================================
 # Edge Cases
 # =============================================================================
 

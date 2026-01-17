@@ -18,6 +18,7 @@ from src.core.protocols import (
     RepositoryManagerProtocol,
     SessionManagerProtocol,
 )
+from src.core.settings_manager import SettingsManager
 
 __all__ = [
     "ITERATIONS",
@@ -31,5 +32,7 @@ __all__ = [
     "ProfileManagerProtocol",
     "RepositoryManagerProtocol",
     "SessionManagerProtocol",
+    # Settings
+    "SettingsManager",
     "secure_zero",
 ]
