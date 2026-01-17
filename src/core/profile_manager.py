@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import struct
+import tempfile
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
@@ -32,6 +34,14 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from src.core.protocols import CryptoServiceProtocol, SessionManagerProtocol
+    from src.services.protocols import (
+        CredentialServiceProtocol,
+        GitServiceProtocol,
+        GPGServiceProtocol,
+        SSHServiceProtocol,
+    )
+
+logger = logging.getLogger(__name__)
 
 
 # profiles.dat magic number and version
@@ -46,24 +56,34 @@ class ProfileManager:
     - Creating, reading, updating, and deleting profiles
     - Encrypted storage of profiles and keys
     - Session validation for all operations
-
-    Note: switch_profile() and validate_credentials() are NOT implemented
-    in Phase 3 - they will raise NotImplementedError.
+    - Switching between profiles (applying configuration)
     """
 
     def __init__(
         self,
         session_manager: SessionManagerProtocol,
         crypto_service: CryptoServiceProtocol,
+        git_service: GitServiceProtocol | None = None,
+        ssh_service: SSHServiceProtocol | None = None,
+        gpg_service: GPGServiceProtocol | None = None,
+        credential_service: CredentialServiceProtocol | None = None,
     ) -> None:
         """Initialize the profile manager.
 
         Args:
             session_manager: Service for session state management.
             crypto_service: Service for cryptographic operations.
+            git_service: Service for Git configuration operations.
+            ssh_service: Service for SSH agent operations.
+            gpg_service: Service for GPG keyring operations.
+            credential_service: Service for credential management.
         """
         self._session = session_manager
         self._crypto = crypto_service
+        self._git_service = git_service
+        self._ssh_service = ssh_service
+        self._gpg_service = gpg_service
+        self._credential_service = credential_service
         self._profiles: list[Profile] = []
         self._loaded = False
 
@@ -668,12 +688,263 @@ class ProfileManager:
     ) -> None:
         """Switch to a profile (apply configuration).
 
-        NOT IMPLEMENTED IN PHASE 3 - will be implemented in Phase 4 (US2).
+        This method:
+        1. Clears cached Git credentials
+        2. Updates Git configuration (global or local)
+        3. Loads SSH key into ssh-agent
+        4. Imports GPG key if enabled
+        5. Updates profile state (active, last_used)
+
+        Args:
+            profile_id: UUID of the profile to switch to.
+            scope: "global" for global config, "local" for repository config.
+            repo_path: Required when scope is "local".
 
         Raises:
-            NotImplementedError: Always.
+            ProfileNotFoundError: If profile doesn't exist.
+            SessionExpiredError: If session is locked.
+            SSHServiceError: If SSH key operations fail.
+            GPGServiceError: If GPG key operations fail.
+            GitServiceError: If Git config operations fail.
         """
-        raise NotImplementedError("switch_profile will be implemented in Phase 4 (US2)")
+        self._check_session()
+        self._ensure_loaded()
+
+        # Find profile
+        profile = self.get_profile(profile_id)
+        if not profile:
+            raise ProfileNotFoundError(f"Profile not found: {profile_id}")
+
+        # 1. Clear cached Git credentials
+        if self._credential_service:
+            try:
+                cleared = self._credential_service.clear_git_credentials()
+                if cleared:
+                    logger.info(f"Cleared {len(cleared)} cached credentials")
+            except Exception as e:
+                logger.warning(f"Failed to clear credentials: {e}")
+
+        # 2. Update Git configuration
+        if self._git_service:
+            signing_key = profile.gpg_key.key_id if profile.gpg_key.enabled else None
+            gpg_sign = profile.gpg_key.enabled
+
+            if scope == "local" and repo_path:
+                self._git_service.set_local_config(
+                    repo_path=repo_path,
+                    username=profile.git_username,
+                    email=profile.git_email,
+                    signing_key=signing_key,
+                    gpg_sign=gpg_sign,
+                )
+                logger.info(f"Updated local Git config for {repo_path}")
+            else:
+                self._git_service.set_global_config(
+                    username=profile.git_username,
+                    email=profile.git_email,
+                    signing_key=signing_key,
+                    gpg_sign=gpg_sign,
+                )
+                logger.info("Updated global Git config")
+
+        # 3. Load SSH key into agent
+        if self._ssh_service and profile.ssh_key:
+            # Remove all existing keys from agent
+            self._ssh_service.remove_all_keys()
+
+            # Write private key to temp file and add to agent
+            ssh_key = profile.ssh_key
+            private_key = self._decrypt_ssh_key(profile_id, ssh_key)
+            passphrase = self._get_ssh_passphrase(profile_id, ssh_key)
+
+            if private_key:
+                self._add_ssh_key_to_agent(private_key, passphrase)
+
+        # 4. Import GPG key if enabled
+        if self._gpg_service and profile.gpg_key.enabled:
+            gpg_key = profile.gpg_key
+            if gpg_key.private_key_encrypted:
+                # Decrypt GPG key
+                gpg_private_key = self._decrypt_gpg_key(profile_id, gpg_key)
+                if gpg_private_key:
+                    try:
+                        self._gpg_service.import_key(gpg_private_key)
+                        logger.info(f"Imported GPG key {gpg_key.key_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to import GPG key: {e}")
+
+        # 5. Update profile state
+        self._deactivate_all_profiles()
+
+        # Find and update the profile
+        for i, p in enumerate(self._profiles):
+            if p.id == profile_id:
+                # Create updated profile with new state
+                self._profiles[i] = Profile(
+                    id=p.id,
+                    name=p.name,
+                    git_username=p.git_username,
+                    git_email=p.git_email,
+                    organization=p.organization,
+                    ssh_key=p.ssh_key,
+                    gpg_key=p.gpg_key,
+                    created_at=p.created_at,
+                    last_used=datetime.now(tz=UTC),
+                    is_active=True,
+                )
+                break
+
+        self._save_profiles()
+        logger.info(f"Switched to profile: {profile.name}")
+
+        # Show notification
+        try:
+            from src.utils.notifications import show_profile_switch_notification
+
+            show_profile_switch_notification(
+                profile_name=profile.name,
+                organization=profile.organization if profile.organization else None,
+            )
+        except Exception as e:
+            logger.debug(f"Failed to show notification: {e}")
+
+    def _deactivate_all_profiles(self) -> None:
+        """Deactivate all profiles."""
+        for i, p in enumerate(self._profiles):
+            if p.is_active:
+                self._profiles[i] = Profile(
+                    id=p.id,
+                    name=p.name,
+                    git_username=p.git_username,
+                    git_email=p.git_email,
+                    organization=p.organization,
+                    ssh_key=p.ssh_key,
+                    gpg_key=p.gpg_key,
+                    created_at=p.created_at,
+                    last_used=p.last_used,
+                    is_active=False,
+                )
+
+    def _decrypt_ssh_key(self, profile_id: UUID, ssh_key: SSHKey) -> bytes | None:
+        """Decrypt the SSH private key from storage.
+
+        Args:
+            profile_id: Profile UUID.
+            ssh_key: SSHKey object with encrypted data.
+
+        Returns:
+            Decrypted private key bytes, or None if not available.
+        """
+        key = self._check_session()
+        ssh_path = get_ssh_key_path(str(profile_id))
+
+        if not ssh_path.exists():
+            return None
+
+        try:
+            encrypted_data = ssh_path.read_bytes()
+            decrypted = self._crypto.decrypt(encrypted_data, key)
+            key_data = json.loads(decrypted.decode("utf-8"))
+
+            # The private key is double-encrypted: once in key_data, once in file
+            encrypted_private = base64.b64decode(key_data["private_key"])
+            return self._crypto.decrypt(encrypted_private, key)
+        except Exception as e:
+            logger.warning(f"Failed to decrypt SSH key: {e}")
+            return None
+
+    def _get_ssh_passphrase(self, profile_id: UUID, ssh_key: SSHKey) -> str | None:
+        """Get the SSH key passphrase.
+
+        Args:
+            profile_id: Profile UUID.
+            ssh_key: SSHKey object.
+
+        Returns:
+            Decrypted passphrase, or None if not set.
+        """
+        key = self._check_session()
+        ssh_path = get_ssh_key_path(str(profile_id))
+
+        if not ssh_path.exists():
+            return None
+
+        try:
+            encrypted_data = ssh_path.read_bytes()
+            decrypted = self._crypto.decrypt(encrypted_data, key)
+            key_data = json.loads(decrypted.decode("utf-8"))
+
+            if not key_data.get("passphrase"):
+                return None
+
+            encrypted_passphrase = base64.b64decode(key_data["passphrase"])
+            decrypted_passphrase = self._crypto.decrypt(encrypted_passphrase, key)
+            return decrypted_passphrase.decode("utf-8")
+        except Exception as e:
+            logger.warning(f"Failed to get SSH passphrase: {e}")
+            return None
+
+    def _add_ssh_key_to_agent(
+        self, private_key: bytes, passphrase: str | None = None
+    ) -> None:
+        """Add SSH key to agent via temp file.
+
+        Args:
+            private_key: Decrypted private key bytes.
+            passphrase: Optional passphrase.
+        """
+        import os
+        from pathlib import Path as PathType
+
+        if not self._ssh_service:
+            return
+
+        # Write key to temp file
+        fd, temp_path = tempfile.mkstemp(suffix=".key", prefix="gs_")
+        try:
+            os.write(fd, private_key)
+            os.close(fd)
+
+            # Set restrictive permissions (Windows doesn't fully support this)
+            temp_file = PathType(temp_path)
+
+            # Add to agent
+            self._ssh_service.add_key(temp_file, passphrase)
+            logger.info("Added SSH key to agent")
+        finally:
+            # Securely delete temp file
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+
+    def _decrypt_gpg_key(self, profile_id: UUID, gpg_key: GPGKey) -> bytes | None:
+        """Decrypt the GPG private key from storage.
+
+        Args:
+            profile_id: Profile UUID.
+            gpg_key: GPGKey object with encrypted data.
+
+        Returns:
+            Decrypted private key bytes, or None if not available.
+        """
+        key = self._check_session()
+        gpg_path = get_gpg_key_path(str(profile_id))
+
+        if not gpg_path.exists():
+            return None
+
+        try:
+            encrypted_data = gpg_path.read_bytes()
+            decrypted = self._crypto.decrypt(encrypted_data, key)
+            key_data = json.loads(decrypted.decode("utf-8"))
+
+            # The private key is double-encrypted
+            encrypted_private = base64.b64decode(key_data["private_key"])
+            return self._crypto.decrypt(encrypted_private, key)
+        except Exception as e:
+            logger.warning(f"Failed to decrypt GPG key: {e}")
+            return None
 
     def validate_credentials(
         self,

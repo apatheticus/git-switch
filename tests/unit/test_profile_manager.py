@@ -26,6 +26,66 @@ if TYPE_CHECKING:
 
 
 # =============================================================================
+# Mock Service Fixtures (for switch_profile tests)
+# =============================================================================
+
+
+@pytest.fixture
+def mock_git_service() -> MagicMock:
+    """Create a mock GitService."""
+    mock = MagicMock()
+    mock.is_git_installed.return_value = True
+    mock.get_global_config.return_value = {
+        "user.name": "Test User",
+        "user.email": "test@example.com",
+    }
+    return mock
+
+
+@pytest.fixture
+def mock_ssh_service() -> MagicMock:
+    """Create a mock SSHService."""
+    mock = MagicMock()
+    mock.is_agent_running.return_value = True
+    mock.list_keys.return_value = []
+    mock.add_key.return_value = True
+    mock.remove_all_keys.return_value = True
+    mock.test_connection.return_value = (True, "Hi testuser!")
+    return mock
+
+
+@pytest.fixture
+def mock_gpg_service() -> MagicMock:
+    """Create a mock GPGService."""
+    mock = MagicMock()
+    mock.is_gpg_installed.return_value = True
+    mock.list_keys.return_value = []
+    mock.verify_signing_capability.return_value = True
+    mock.import_key.return_value = "ABCD1234EFGH5678"
+    return mock
+
+
+@pytest.fixture
+def mock_credential_service() -> MagicMock:
+    """Create a mock CredentialService."""
+    mock = MagicMock()
+    mock.list_git_credentials.return_value = []
+    mock.clear_git_credentials.return_value = []
+    return mock
+
+
+@pytest.fixture
+def mock_git_repo(temp_dir: Path) -> Path:
+    """Create a mock Git repository for testing."""
+    repo_dir = temp_dir / "test-repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+    git_dir = repo_dir / ".git"
+    git_dir.mkdir(exist_ok=True)
+    (git_dir / "config").write_text("[core]\n\trepositoryformatversion = 0\n")
+    return repo_dir
+
+
+# =============================================================================
 # Fixtures
 # =============================================================================
 
@@ -595,3 +655,245 @@ class TestSessionLockBehavior:
 
         with pytest.raises(SessionExpiredError):
             profile_manager_locked.delete_profile(uuid4())
+
+
+# =============================================================================
+# Switch Profile Tests (Phase 4 - US2)
+# =============================================================================
+
+
+@pytest.fixture
+def profile_manager_with_services(
+    mock_session_manager: MagicMock,
+    mock_crypto_service: MagicMock,
+    mock_git_service: MagicMock,
+    mock_ssh_service: MagicMock,
+    mock_gpg_service: MagicMock,
+    mock_credential_service: MagicMock,
+    temp_dir: Path,
+) -> "ProfileManager":
+    """Create a ProfileManager with all service mocks for switch_profile testing."""
+    from src.core.profile_manager import ProfileManager
+
+    keys_dir = temp_dir / "keys"
+    keys_dir.mkdir(exist_ok=True)
+
+    with (
+        patch("src.core.profile_manager.get_profiles_path") as mock_profiles_path,
+        patch("src.core.profile_manager.get_ssh_key_path") as mock_ssh_path,
+        patch("src.core.profile_manager.get_gpg_key_path") as mock_gpg_path,
+    ):
+        mock_profiles_path.return_value = temp_dir / "profiles.dat"
+        mock_ssh_path.side_effect = lambda pid: keys_dir / f"{pid}.ssh"
+        mock_gpg_path.side_effect = lambda pid: keys_dir / f"{pid}.gpg"
+
+        manager = ProfileManager(
+            mock_session_manager,
+            mock_crypto_service,
+            git_service=mock_git_service,
+            ssh_service=mock_ssh_service,
+            gpg_service=mock_gpg_service,
+            credential_service=mock_credential_service,
+        )
+        manager._git_service = mock_git_service
+        manager._ssh_service = mock_ssh_service
+        manager._gpg_service = mock_gpg_service
+        manager._credential_service = mock_credential_service
+        yield manager
+
+
+class TestSwitchProfile:
+    """Tests for switch_profile() method."""
+
+    def test_switch_profile_updates_git_config(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """switch_profile should update global Git configuration."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        profile_manager_with_services.switch_profile(profile.id)
+
+        mock_git_service.set_global_config.assert_called_once()
+        call_kwargs = mock_git_service.set_global_config.call_args
+        assert call_kwargs.kwargs.get("username") == "work-user" or call_kwargs[1].get("username") == "work-user"
+
+    def test_switch_profile_clears_credentials(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_credential_service: MagicMock,
+    ) -> None:
+        """switch_profile should clear cached Git credentials."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        profile_manager_with_services.switch_profile(profile.id)
+
+        mock_credential_service.clear_git_credentials.assert_called_once()
+
+    def test_switch_profile_adds_ssh_key_to_agent(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_ssh_service: MagicMock,
+    ) -> None:
+        """switch_profile should add the profile's SSH key to ssh-agent."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        profile_manager_with_services.switch_profile(profile.id)
+
+        mock_ssh_service.remove_all_keys.assert_called_once()
+        mock_ssh_service.add_key.assert_called_once()
+
+    def test_switch_profile_imports_gpg_key_when_enabled(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_gpg_service: MagicMock,
+    ) -> None:
+        """switch_profile should import GPG key when GPG is enabled."""
+        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+            gpg_enabled=True,
+            gpg_key_id="ABCD1234EFGH5678",
+            gpg_private_key=gpg_private,
+            gpg_public_key=gpg_public,
+        )
+
+        profile_manager_with_services.switch_profile(profile.id)
+
+        mock_gpg_service.import_key.assert_called()
+
+    def test_switch_profile_deactivates_previous_active_profile(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+    ) -> None:
+        """switch_profile should deactivate the previously active profile."""
+        profile1 = profile_manager_with_services.create_profile(
+            name="Profile1",
+            git_username="user1",
+            git_email="user1@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+        profile2 = profile_manager_with_services.create_profile(
+            name="Profile2",
+            git_username="user2",
+            git_email="user2@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Switch to first profile
+        profile_manager_with_services.switch_profile(profile1.id)
+        assert profile_manager_with_services.get_active_profile().id == profile1.id
+
+        # Switch to second profile
+        profile_manager_with_services.switch_profile(profile2.id)
+
+        # First profile should be inactive
+        p1 = profile_manager_with_services.get_profile(profile1.id)
+        p2 = profile_manager_with_services.get_profile(profile2.id)
+        assert p1.is_active is False
+        assert p2.is_active is True
+
+    def test_switch_profile_updates_last_used_timestamp(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+    ) -> None:
+        """switch_profile should update the last_used timestamp."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        original_last_used = profile.last_used
+
+        profile_manager_with_services.switch_profile(profile.id)
+
+        updated = profile_manager_with_services.get_profile(profile.id)
+        assert updated.last_used is not None
+        if original_last_used is not None:
+            assert updated.last_used > original_last_used
+
+    def test_switch_profile_raises_profile_not_found(
+        self, profile_manager_with_services: "ProfileManager"
+    ) -> None:
+        """switch_profile should raise ProfileNotFoundError for non-existent profile."""
+        from src.models.exceptions import ProfileNotFoundError
+
+        random_id = uuid4()
+        with pytest.raises(ProfileNotFoundError):
+            profile_manager_with_services.switch_profile(random_id)
+
+    def test_switch_profile_requires_unlocked_session(
+        self, profile_manager_locked: "ProfileManager"
+    ) -> None:
+        """switch_profile should raise SessionExpiredError when session is locked."""
+        from src.models.exceptions import SessionExpiredError
+
+        with pytest.raises(SessionExpiredError):
+            profile_manager_locked.switch_profile(uuid4())
+
+    def test_switch_profile_local_scope_updates_repo_config(
+        self,
+        profile_manager_with_services: "ProfileManager",
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+        mock_git_repo: Path,
+    ) -> None:
+        """switch_profile with local scope should update repository config."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        profile_manager_with_services.switch_profile(
+            profile.id, scope="local", repo_path=mock_git_repo
+        )
+
+        mock_git_service.set_local_config.assert_called_once()
+        call_kwargs = mock_git_service.set_local_config.call_args
+        assert call_kwargs.kwargs.get("repo_path") == mock_git_repo or call_kwargs[1].get("repo_path") == mock_git_repo
