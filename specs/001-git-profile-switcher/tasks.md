@@ -37,41 +37,41 @@
 
 ### Exception Hierarchy
 
-- [ ] T008 Create exception hierarchy in src/models/exceptions.py (GitSwitchError, AuthenticationError, InvalidPasswordError, SessionExpiredError, EncryptionError, ProfileError, ProfileNotFoundError, ProfileValidationError, ServiceError, GitServiceError, SSHServiceError, GPGServiceError, CredentialServiceError, RepositoryError, InvalidRepositoryError)
-- [ ] T009 [P] Write unit tests for exception hierarchy in tests/unit/test_exceptions.py
+- [x] T008 Create exception hierarchy in src/models/exceptions.py (GitSwitchError, AuthenticationError, InvalidPasswordError, SessionExpiredError, EncryptionError, ProfileError, ProfileNotFoundError, ProfileValidationError, ServiceError, GitServiceError, SSHServiceError, GPGServiceError, CredentialServiceError, RepositoryError, InvalidRepositoryError)
+- [x] T009 [P] Write unit tests for exception hierarchy in tests/unit/test_exceptions.py
 
 ### Data Models (No Encryption)
 
-- [ ] T010 [P] Create SSHKey dataclass in src/models/profile.py with validation (__post_init__)
-- [ ] T011 [P] Create GPGKey dataclass in src/models/profile.py with validation (__post_init__)
-- [ ] T012 Create Profile dataclass in src/models/profile.py with validation (depends on T010, T011)
-- [ ] T013 [P] Create Repository dataclass in src/models/repository.py with validation and is_valid_git_repo()
-- [ ] T014 [P] Create Settings dataclass in src/models/settings.py with validation
-- [ ] T015 [P] Create MasterKeyConfig dataclass in src/models/settings.py with validation
-- [ ] T016 Create GitSwitchEncoder JSON encoder in src/models/serialization.py for UUID, datetime, Path, bytes
-- [ ] T017 Create src/models/__init__.py exporting all model classes
-- [ ] T018 Write unit tests for all dataclasses in tests/unit/test_models.py (100% coverage per constitution)
+- [x] T010 [P] Create SSHKey dataclass in src/models/profile.py with validation (__post_init__)
+- [x] T011 [P] Create GPGKey dataclass in src/models/profile.py with validation (__post_init__)
+- [x] T012 Create Profile dataclass in src/models/profile.py with validation (depends on T010, T011)
+- [x] T013 [P] Create Repository dataclass in src/models/repository.py with validation and is_valid_git_repo()
+- [x] T014 [P] Create Settings dataclass in src/models/settings.py with validation
+- [x] T015 [P] Create MasterKeyConfig dataclass in src/models/settings.py with validation
+- [x] T016 Create GitSwitchEncoder JSON encoder in src/models/serialization.py for UUID, datetime, Path, bytes
+- [x] T017 Create src/models/__init__.py exporting all model classes
+- [x] T018 Write unit tests for all dataclasses in tests/unit/test_models.py (100% coverage per constitution)
 
 ### Service Protocols
 
-- [ ] T019 Create all Protocol classes in src/services/protocols.py (GitServiceProtocol, SSHServiceProtocol, GPGServiceProtocol, CredentialServiceProtocol)
-- [ ] T020 [P] Create core Protocol classes in src/core/protocols.py (CryptoServiceProtocol, SessionManagerProtocol, ProfileManagerProtocol, RepositoryManagerProtocol)
-- [ ] T021 Create ServiceContainer dataclass in src/services/container.py with create_container() and create_test_container()
+- [x] T019 Create all Protocol classes in src/services/protocols.py (GitServiceProtocol, SSHServiceProtocol, GPGServiceProtocol, CredentialServiceProtocol)
+- [x] T020 [P] Create core Protocol classes in src/core/protocols.py (CryptoServiceProtocol, SessionManagerProtocol, ProfileManagerProtocol, RepositoryManagerProtocol)
+- [x] T021 Create ServiceContainer dataclass in src/services/container.py with create_container() and create_test_container()
 
 ### Utility Modules
 
-- [ ] T022 [P] Create paths.py in src/utils/paths.py with get_app_data_dir(), get_profiles_path(), get_config_path(), etc.
-- [ ] T023 [P] Create windows.py in src/utils/windows.py with Windows-specific helpers
-- [ ] T024 [P] Create notifications.py in src/utils/notifications.py with show_notification() wrapper
-- [ ] T025 Create src/utils/__init__.py exporting utility functions
-- [ ] T026 Write unit tests for utility modules in tests/unit/test_utils.py
+- [x] T022 [P] Create paths.py in src/utils/paths.py with get_app_data_dir(), get_profiles_path(), get_config_path(), etc.
+- [x] T023 [P] Create windows.py in src/utils/windows.py with Windows-specific helpers
+- [x] T024 [P] Create notifications.py in src/utils/notifications.py with show_notification() wrapper
+- [x] T025 Create src/utils/__init__.py exporting utility functions
+- [x] T026 Write unit tests for utility modules in tests/unit/test_utils.py
 
 ### Crypto Service (Security Critical)
 
-- [ ] T027 Write security tests for crypto in tests/security/test_encryption_roundtrip.py (MUST FAIL first)
-- [ ] T028 [P] Write security tests for no plaintext leakage in tests/security/test_no_plaintext_leakage.py (MUST FAIL first)
-- [ ] T029 Implement CryptoService in src/core/crypto.py (derive_key with PBKDF2 100k iterations, encrypt/decrypt with AES-256-GCM, generate_salt, create_verification_hash, verify_password, secure_delete_file, secure_zero helper)
-- [ ] T030 Verify security tests pass after implementation
+- [x] T027 Write security tests for crypto in tests/security/test_encryption_roundtrip.py (MUST FAIL first)
+- [x] T028 [P] Write security tests for no plaintext leakage in tests/security/test_no_plaintext_leakage.py (MUST FAIL first)
+- [x] T029 Implement CryptoService in src/core/crypto.py (derive_key with PBKDF2 100k iterations, encrypt/decrypt with AES-256-GCM, generate_salt, create_verification_hash, verify_password, secure_delete_file, secure_zero helper)
+- [x] T030 Verify security tests pass after implementation
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -85,24 +85,24 @@
 
 ### Tests for User Story 1
 
-- [ ] T031 [P] [US1] Write unit tests for SessionManager in tests/unit/test_session.py (MUST FAIL first)
-- [ ] T032 [P] [US1] Write unit tests for ProfileManager CRUD in tests/unit/test_profile_manager.py (MUST FAIL first)
-- [ ] T033 [P] [US1] Write security tests for authentication edge cases in tests/security/test_authentication_edge_cases.py (MUST FAIL first)
+- [x] T031 [P] [US1] Write unit tests for SessionManager in tests/unit/test_session.py (MUST FAIL first)
+- [x] T032 [P] [US1] Write unit tests for ProfileManager CRUD in tests/unit/test_profile_manager.py (MUST FAIL first)
+- [x] T033 [P] [US1] Write security tests for authentication edge cases in tests/security/test_authentication_edge_cases.py (MUST FAIL first)
 
 ### Implementation for User Story 1
 
-- [ ] T034 [US1] Implement SessionManager in src/core/session.py (unlock, lock, setup_master_password, change_master_password, reset_idle_timer, auto-lock timer, has_master_password)
-- [ ] T035 [US1] Implement ProfileManager CRUD in src/core/profile_manager.py (list_profiles, get_profile, create_profile, update_profile, delete_profile - without switch logic)
-- [ ] T036 [US1] Implement profile storage file format (profiles.dat) with encrypt/decrypt in ProfileManager
-- [ ] T037 [US1] Implement SSH key storage in keys/{profile_id}.ssh with encryption
-- [ ] T038 [US1] Implement GPG key storage in keys/{profile_id}.gpg with encryption (optional, if GPG enabled)
-- [ ] T039 [US1] Verify all US1 tests pass
+- [x] T034 [US1] Implement SessionManager in src/core/session.py (unlock, lock, setup_master_password, change_master_password, reset_idle_timer, auto-lock timer, has_master_password)
+- [x] T035 [US1] Implement ProfileManager CRUD in src/core/profile_manager.py (list_profiles, get_profile, create_profile, update_profile, delete_profile - without switch logic)
+- [x] T036 [US1] Implement profile storage file format (profiles.dat) with encrypt/decrypt in ProfileManager
+- [x] T037 [US1] Implement SSH key storage in keys/{profile_id}.ssh with encryption
+- [x] T038 [US1] Implement GPG key storage in keys/{profile_id}.gpg with encryption (optional, if GPG enabled)
+- [x] T039 [US1] Verify all US1 tests pass
 
 **Checkpoint**: User Story 1 complete - profiles can be created and stored securely
 
 ---
 
-## Phase 4: User Story 2 - Switch Git Profile Globally (Priority: P1)
+## Phase 4: User Story 2 - Switch Git Profile Globally (Priority: P1) COMPLETE
 
 **Goal**: Apply a profile globally - update Git config, clear credentials, load SSH key into agent
 
@@ -110,29 +110,29 @@
 
 ### Tests for User Story 2
 
-- [ ] T040 [P] [US2] Write unit tests for GitService in tests/unit/test_git_service.py (MUST FAIL first)
-- [ ] T041 [P] [US2] Write unit tests for SSHService in tests/unit/test_ssh_service.py (MUST FAIL first)
-- [ ] T042 [P] [US2] Write unit tests for CredentialService in tests/unit/test_credential_service.py (MUST FAIL first)
-- [ ] T043 [P] [US2] Write unit tests for GPGService in tests/unit/test_gpg_service.py (MUST FAIL first)
-- [ ] T044 [P] [US2] Write unit tests for ProfileManager.switch_profile in tests/unit/test_profile_manager.py (append to existing)
-- [ ] T045 [P] [US2] Write integration tests for profile switch in tests/integration/test_profile_switch.py (MUST FAIL first)
+- [x] T040 [P] [US2] Write unit tests for GitService in tests/unit/test_git_service.py (MUST FAIL first)
+- [x] T041 [P] [US2] Write unit tests for SSHService in tests/unit/test_ssh_service.py (MUST FAIL first)
+- [x] T042 [P] [US2] Write unit tests for CredentialService in tests/unit/test_credential_service.py (MUST FAIL first)
+- [x] T043 [P] [US2] Write unit tests for GPGService in tests/unit/test_gpg_service.py (MUST FAIL first)
+- [x] T044 [P] [US2] Write unit tests for ProfileManager.switch_profile in tests/unit/test_profile_manager.py (append to existing)
+- [x] T045 [P] [US2] Write integration tests for profile switch in tests/integration/test_profile_switch.py (MUST FAIL first)
 
 ### Implementation for User Story 2
 
-- [ ] T046 [US2] Implement GitService in src/services/git_service.py (is_git_installed, get_global_config, set_global_config, get_local_config, set_local_config)
-- [ ] T047 [US2] Implement SSHService in src/services/ssh_service.py (is_agent_running, start_agent, list_keys, add_key, remove_all_keys, test_connection, get_key_fingerprint, validate_private_key)
-- [ ] T048 [US2] Implement CredentialService in src/services/credential_service.py (list_git_credentials, delete_credential, clear_git_credentials, has_credential)
-- [ ] T049 [US2] Implement GPGService in src/services/gpg_service.py (is_gpg_installed, list_keys, import_key, export_key, delete_key, verify_signing_capability, validate_key)
-- [ ] T050 [US2] Create src/services/__init__.py exporting all services
-- [ ] T051 [US2] Implement ProfileManager.switch_profile in src/core/profile_manager.py (global scope: update git config, clear credentials, update ssh-agent, update GPG if enabled)
-- [ ] T052 [US2] Integrate with notifications (show_notification on switch complete)
-- [ ] T053 [US2] Verify all US2 tests pass
+- [x] T046 [US2] Implement GitService in src/services/git_service.py (is_git_installed, get_global_config, set_global_config, get_local_config, set_local_config)
+- [x] T047 [US2] Implement SSHService in src/services/ssh_service.py (is_agent_running, start_agent, list_keys, add_key, remove_all_keys, test_connection, get_key_fingerprint, validate_private_key)
+- [x] T048 [US2] Implement CredentialService in src/services/credential_service.py (list_git_credentials, delete_credential, clear_git_credentials, has_credential)
+- [x] T049 [US2] Implement GPGService in src/services/gpg_service.py (is_gpg_installed, list_keys, import_key, export_key, delete_key, verify_signing_capability, validate_key)
+- [x] T050 [US2] Create src/services/__init__.py exporting all services
+- [x] T051 [US2] Implement ProfileManager.switch_profile in src/core/profile_manager.py (global scope: update git config, clear credentials, update ssh-agent, update GPG if enabled)
+- [x] T052 [US2] Integrate with notifications (show_notification on switch complete)
+- [x] T053 [US2] Verify all US2 tests pass
 
 **Checkpoint**: User Story 2 complete - profiles can be switched globally
 
 ---
 
-## Phase 5: User Story 3 - Secure Application Access (Priority: P1)
+## Phase 5: User Story 3 - Secure Application Access (Priority: P1) COMPLETE
 
 **Goal**: Protect profiles with master password, auto-lock on idle, lock on demand
 
@@ -140,22 +140,22 @@
 
 ### Tests for User Story 3
 
-- [ ] T054 [P] [US3] Write unit tests for idle timer in tests/unit/test_session.py (append to existing, MUST FAIL first)
-- [ ] T055 [P] [US3] Write e2e test for password workflow in tests/e2e/test_password_workflow.py (MUST FAIL first)
+- [x] T054 [P] [US3] Write unit tests for idle timer in tests/unit/test_session.py (append to existing, MUST FAIL first)
+- [x] T055 [P] [US3] Write e2e test for password workflow in tests/e2e/test_password_workflow.py (MUST FAIL first)
 
 ### Implementation for User Story 3
 
-- [ ] T056 [US3] Implement auto-lock timer in SessionManager (configurable timeout from Settings)
-- [ ] T057 [US3] Implement lock callback mechanism for UI notification
-- [ ] T058 [US3] Implement secure memory clearing on lock (zero encryption key using secure_zero)
-- [ ] T059 [US3] Load Settings from config.json with auto_lock_timeout
-- [ ] T060 [US3] Verify all US3 tests pass
+- [x] T056 [US3] Implement auto-lock timer in SessionManager (configurable timeout from Settings)
+- [x] T057 [US3] Implement lock callback mechanism for UI notification
+- [x] T058 [US3] Implement secure memory clearing on lock (zero encryption key using secure_zero)
+- [x] T059 [US3] Load Settings from config.json with auto_lock_timeout
+- [x] T060 [US3] Verify all US3 tests pass
 
 **Checkpoint**: User Story 3 complete - application access is secured
 
 ---
 
-## Phase 6: User Story 4 - Manage Profiles (Priority: P2)
+## Phase 6: User Story 4 - Manage Profiles (Priority: P2) COMPLETE
 
 **Goal**: Edit existing profiles, delete profiles with confirmation
 
@@ -163,13 +163,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T061 [P] [US4] Write unit tests for profile update/delete edge cases in tests/unit/test_profile_manager.py (append, MUST FAIL first)
+- [x] T061 [P] [US4] Write unit tests for profile update/delete edge cases in tests/unit/test_profile_manager.py (append, MUST FAIL first)
 
 ### Implementation for User Story 4
 
-- [ ] T062 [US4] Enhance ProfileManager.update_profile to handle SSH key replacement
-- [ ] T063 [US4] Enhance ProfileManager.delete_profile to clean up key files and handle active profile deletion
-- [ ] T064 [US4] Verify all US4 tests pass
+- [x] T062 [US4] Enhance ProfileManager.update_profile to handle SSH key replacement
+- [x] T063 [US4] Enhance ProfileManager.delete_profile to clean up key files and handle active profile deletion
+- [x] T064 [US4] Verify all US4 tests pass
 
 **Checkpoint**: User Story 4 complete - profiles can be edited and deleted
 
@@ -183,21 +183,21 @@
 
 ### Tests for User Story 5
 
-- [ ] T065 [P] [US5] Write unit tests for RepositoryManager in tests/unit/test_repository_manager.py (MUST FAIL first)
-- [ ] T066 [P] [US5] Write integration tests for local config in tests/integration/test_local_config.py (MUST FAIL first)
+- [x] T065 [P] [US5] Write unit tests for RepositoryManager in tests/unit/test_repository_manager.py (MUST FAIL first)
+- [x] T066 [P] [US5] Write integration tests for local config in tests/integration/test_local_config.py (MUST FAIL first)
 
 ### Implementation for User Story 5
 
-- [ ] T067 [US5] Implement RepositoryManager in src/core/repository_manager.py (list_repositories, get_repository, add_repository, remove_repository, assign_profile, apply_profile, validate_repository)
-- [ ] T068 [US5] Implement repository storage in repositories.json
-- [ ] T069 [US5] Enhance ProfileManager.switch_profile to support scope="local" with repo_path
-- [ ] T070 [US5] Verify all US5 tests pass
+- [x] T067 [US5] Implement RepositoryManager in src/core/repository_manager.py (list_repositories, get_repository, add_repository, remove_repository, assign_profile, apply_profile, validate_repository)
+- [x] T068 [US5] Implement repository storage in repositories.json
+- [x] T069 [US5] Enhance ProfileManager.switch_profile to support scope="local" with repo_path
+- [x] T070 [US5] Verify all US5 tests pass
 
-**Checkpoint**: User Story 5 complete - repositories can have per-repo profiles
+**Checkpoint**: User Story 5 complete - repositories can have per-repo profiles ✓
 
 ---
 
-## Phase 8: User Story 6 - System Tray Quick Access (Priority: P2)
+## Phase 8: User Story 6 - System Tray Quick Access (Priority: P2) COMPLETE
 
 **Goal**: System tray icon with context menu for quick profile switching
 
@@ -205,20 +205,20 @@
 
 ### Tests for User Story 6
 
-- [ ] T071 [P] [US6] Write unit tests for system tray callbacks in tests/unit/test_system_tray.py (MUST FAIL first)
+- [x] T071 [P] [US6] Write unit tests for system tray callbacks in tests/unit/test_system_tray.py (MUST FAIL first)
 
 ### Implementation for User Story 6
 
-- [ ] T072 [US6] Implement system tray integration in src/ui/system_tray.py (create_tray_icon, update_menu, callbacks for switch/open/lock/exit)
-- [ ] T073 [US6] Integrate tray icon with SessionManager lock state
-- [ ] T074 [US6] Handle minimize to tray and restore from tray
-- [ ] T075 [US6] Verify all US6 tests pass
+- [x] T072 [US6] Implement system tray integration in src/ui/system_tray.py (create_tray_icon, update_menu, callbacks for switch/open/lock/exit)
+- [x] T073 [US6] Integrate tray icon with SessionManager lock state
+- [x] T074 [US6] Handle minimize to tray and restore from tray
+- [x] T075 [US6] Verify all US6 tests pass
 
 **Checkpoint**: User Story 6 complete - quick access via system tray
 
 ---
 
-## Phase 9: User Story 7 - Import/Export Profiles (Priority: P3)
+## Phase 9: User Story 7 - Import/Export Profiles (Priority: P3) COMPLETE
 
 **Goal**: Export profiles to encrypted .gps archive, import with merge/replace options
 
@@ -226,21 +226,21 @@
 
 ### Tests for User Story 7
 
-- [ ] T076 [P] [US7] Write unit tests for import/export in tests/unit/test_import_export.py (MUST FAIL first)
+- [x] T076 [P] [US7] Write unit tests for import/export in tests/unit/test_import_export.py (MUST FAIL first)
 
 ### Implementation for User Story 7
 
-- [ ] T077 [US7] Implement export functionality in src/core/import_export.py (export_profiles with separate archive password)
-- [ ] T078 [US7] Implement .gps archive format (encrypted zip with profiles, keys, repository assignments)
-- [ ] T079 [US7] Implement import functionality with merge/replace options
-- [ ] T080 [US7] Implement conflict resolution for duplicate profile names during merge
-- [ ] T081 [US7] Verify all US7 tests pass
+- [x] T077 [US7] Implement export functionality in src/core/import_export.py (export_profiles with separate archive password)
+- [x] T078 [US7] Implement .gps archive format (encrypted zip with profiles, keys, repository assignments)
+- [x] T079 [US7] Implement import functionality with merge/replace options
+- [x] T080 [US7] Implement conflict resolution for duplicate profile names during merge
+- [x] T081 [US7] Verify all US7 tests pass
 
-**Checkpoint**: User Story 7 complete - profiles can be backed up and transferred
+**Checkpoint**: User Story 7 complete - profiles can be backed up and transferred ✓
 
 ---
 
-## Phase 10: User Story 8 - Validate Profile Credentials (Priority: P3)
+## Phase 10: User Story 8 - Validate Profile Credentials (Priority: P3) COMPLETE
 
 **Goal**: Validate SSH keys and GPG keys before use
 
@@ -248,13 +248,13 @@
 
 ### Tests for User Story 8
 
-- [ ] T082 [P] [US8] Write unit tests for validation service in tests/unit/test_validation.py (MUST FAIL first)
+- [x] T082 [P] [US8] Write unit tests for validation service in tests/unit/test_validation.py (MUST FAIL first)
 
 ### Implementation for User Story 8
 
-- [ ] T083 [US8] Implement ValidationService in src/core/validation.py (validate_ssh_key, validate_ssh_connection, validate_gpg_key, validate_gpg_signing)
-- [ ] T084 [US8] Integrate validation into ProfileManager.validate_credentials
-- [ ] T085 [US8] Verify all US8 tests pass
+- [x] T083 [US8] Implement ValidationService in src/core/validation.py (validate_ssh_key, validate_ssh_connection, validate_gpg_key, validate_gpg_signing)
+- [x] T084 [US8] Integrate validation into ProfileManager.validate_credentials
+- [x] T085 [US8] Verify all US8 tests pass
 
 **Checkpoint**: User Story 8 complete - credentials can be validated
 
