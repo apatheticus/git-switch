@@ -197,7 +197,7 @@
 
 ---
 
-## Phase 8: User Story 6 - System Tray Quick Access (Priority: P2)
+## Phase 8: User Story 6 - System Tray Quick Access (Priority: P2) COMPLETE
 
 **Goal**: System tray icon with context menu for quick profile switching
 
@@ -205,14 +205,14 @@
 
 ### Tests for User Story 6
 
-- [ ] T071 [P] [US6] Write unit tests for system tray callbacks in tests/unit/test_system_tray.py (MUST FAIL first)
+- [x] T071 [P] [US6] Write unit tests for system tray callbacks in tests/unit/test_system_tray.py (MUST FAIL first)
 
 ### Implementation for User Story 6
 
-- [ ] T072 [US6] Implement system tray integration in src/ui/system_tray.py (create_tray_icon, update_menu, callbacks for switch/open/lock/exit)
-- [ ] T073 [US6] Integrate tray icon with SessionManager lock state
-- [ ] T074 [US6] Handle minimize to tray and restore from tray
-- [ ] T075 [US6] Verify all US6 tests pass
+- [x] T072 [US6] Implement system tray integration in src/ui/system_tray.py (create_tray_icon, update_menu, callbacks for switch/open/lock/exit)
+- [x] T073 [US6] Integrate tray icon with SessionManager lock state
+- [x] T074 [US6] Handle minimize to tray and restore from tray
+- [x] T075 [US6] Verify all US6 tests pass
 
 **Checkpoint**: User Story 6 complete - quick access via system tray
 
