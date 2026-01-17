@@ -1,0 +1,32 @@
+# Git-Switch Production Dependencies
+# Python 3.11+ required
+
+# GUI Framework - GPU-accelerated via Dear ImGui
+dearpygui>=1.10.0
+
+# Cryptography - AES-256-GCM encryption, PBKDF2 key derivation
+cryptography>=41.0.0
+
+# SSH Operations - Key parsing and validation
+paramiko>=3.3.0
+
+# Git Operations - Repository and config management
+GitPython>=3.1.40
+
+# GPG Operations - Signing key management
+python-gnupg>=0.5.2
+
+# Windows Credential Manager - Credential storage access
+keyring>=24.3.0
+
+# Windows Integration - Win32 API access
+pywin32>=306
+
+# System Tray - Tray icon and menu
+pystray>=0.19.5
+
+# Image Processing - Tray icon support
+Pillow>=10.1.0
+
+# Windows Notifications - Toast notifications
+win10toast>=0.9
