@@ -218,7 +218,7 @@
 
 ---
 
-## Phase 9: User Story 7 - Import/Export Profiles (Priority: P3)
+## Phase 9: User Story 7 - Import/Export Profiles (Priority: P3) COMPLETE
 
 **Goal**: Export profiles to encrypted .gps archive, import with merge/replace options
 
@@ -226,17 +226,17 @@
 
 ### Tests for User Story 7
 
-- [ ] T076 [P] [US7] Write unit tests for import/export in tests/unit/test_import_export.py (MUST FAIL first)
+- [x] T076 [P] [US7] Write unit tests for import/export in tests/unit/test_import_export.py (MUST FAIL first)
 
 ### Implementation for User Story 7
 
-- [ ] T077 [US7] Implement export functionality in src/core/import_export.py (export_profiles with separate archive password)
-- [ ] T078 [US7] Implement .gps archive format (encrypted zip with profiles, keys, repository assignments)
-- [ ] T079 [US7] Implement import functionality with merge/replace options
-- [ ] T080 [US7] Implement conflict resolution for duplicate profile names during merge
-- [ ] T081 [US7] Verify all US7 tests pass
+- [x] T077 [US7] Implement export functionality in src/core/import_export.py (export_profiles with separate archive password)
+- [x] T078 [US7] Implement .gps archive format (encrypted zip with profiles, keys, repository assignments)
+- [x] T079 [US7] Implement import functionality with merge/replace options
+- [x] T080 [US7] Implement conflict resolution for duplicate profile names during merge
+- [x] T081 [US7] Verify all US7 tests pass
 
-**Checkpoint**: User Story 7 complete - profiles can be backed up and transferred
+**Checkpoint**: User Story 7 complete - profiles can be backed up and transferred ✓
 
 ---
 

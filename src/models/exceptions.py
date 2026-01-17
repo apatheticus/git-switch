@@ -165,7 +165,41 @@ class InvalidRepositoryError(RepositoryError):
 
 
 
+# =============================================================================
+# Import/Export Errors
+# =============================================================================
+
+
+class ImportExportError(GitSwitchError):
+    """Base exception for import/export operations.
+
+    Base class for all failures related to profile import
+    and export functionality.
+    """
+
+
+
+class InvalidArchiveError(ImportExportError):
+    """Archive file is invalid or corrupted.
+
+    Raised when an archive file has an invalid magic number,
+    unsupported version, or corrupted data structure.
+    """
+
+
+
+class ArchivePasswordError(ImportExportError):
+    """Archive password is incorrect.
+
+    Raised when the provided password cannot decrypt
+    the archive contents.
+    """
+
+
+
 __all__ = [
+    # Import/Export
+    "ArchivePasswordError",
     # Authentication
     "AuthenticationError",
     "CredentialServiceError",
@@ -175,6 +209,9 @@ __all__ = [
     "GitServiceError",
     # Base
     "GitSwitchError",
+    # Import/Export
+    "ImportExportError",
+    "InvalidArchiveError",
     "InvalidPasswordError",
     "InvalidRepositoryError",
     # Profile
