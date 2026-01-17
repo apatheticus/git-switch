@@ -240,7 +240,7 @@
 
 ---
 
-## Phase 10: User Story 8 - Validate Profile Credentials (Priority: P3)
+## Phase 10: User Story 8 - Validate Profile Credentials (Priority: P3) COMPLETE
 
 **Goal**: Validate SSH keys and GPG keys before use
 
@@ -248,13 +248,13 @@
 
 ### Tests for User Story 8
 
-- [ ] T082 [P] [US8] Write unit tests for validation service in tests/unit/test_validation.py (MUST FAIL first)
+- [x] T082 [P] [US8] Write unit tests for validation service in tests/unit/test_validation.py (MUST FAIL first)
 
 ### Implementation for User Story 8
 
-- [ ] T083 [US8] Implement ValidationService in src/core/validation.py (validate_ssh_key, validate_ssh_connection, validate_gpg_key, validate_gpg_signing)
-- [ ] T084 [US8] Integrate validation into ProfileManager.validate_credentials
-- [ ] T085 [US8] Verify all US8 tests pass
+- [x] T083 [US8] Implement ValidationService in src/core/validation.py (validate_ssh_key, validate_ssh_connection, validate_gpg_key, validate_gpg_signing)
+- [x] T084 [US8] Integrate validation into ProfileManager.validate_credentials
+- [x] T085 [US8] Verify all US8 tests pass
 
 **Checkpoint**: User Story 8 complete - credentials can be validated
 

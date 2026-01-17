@@ -1026,14 +1026,44 @@ class ProfileManager:
     ) -> dict[str, tuple[bool, str]]:
         """Validate profile credentials before saving.
 
-        NOT IMPLEMENTED IN PHASE 3 - will be implemented in Phase 10 (US8).
+        Args:
+            ssh_private_key: SSH private key bytes.
+            ssh_public_key: SSH public key bytes.
+            ssh_passphrase: SSH key passphrase (if protected).
+            test_ssh_connection: Whether to test SSH connectivity.
+            gpg_private_key: GPG private key bytes (optional).
+            test_gpg_signing: Whether to test GPG signing capability.
 
-        Raises:
-            NotImplementedError: Always.
+        Returns:
+            Dictionary with validation results:
+            {
+                "ssh_format": (valid: bool, message: str),
+                "ssh_connection": (valid: bool | None, message: str),
+                "gpg_format": (valid: bool | None, message: str),
+                "gpg_signing": (valid: bool | None, message: str),
+            }
         """
-        raise NotImplementedError(
-            "validate_credentials will be implemented in Phase 10 (US8)"
+        from src.core.validation import ValidationService
+
+        validation_service = ValidationService(
+            ssh_service=self._ssh_service,
+            gpg_service=self._gpg_service,
         )
+
+        results = validation_service.validate_all(
+            ssh_private_key=ssh_private_key,
+            ssh_public_key=ssh_public_key,
+            ssh_passphrase=ssh_passphrase,
+            test_ssh_connection=test_ssh_connection,
+            gpg_private_key=gpg_private_key,
+            test_gpg_signing=test_gpg_signing,
+        )
+
+        # Convert results to the expected format (bool, str) instead of (bool | None, str)
+        return {
+            key: (value[0] if value[0] is not None else False, value[1])
+            for key, value in results.items()
+        }
 
 
 __all__ = [
