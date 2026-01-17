@@ -266,10 +266,10 @@
 
 ### Theme and Base UI
 
-- [ ] T086 Create theme constants in src/ui/theme.py (COLORS dict with cyan/electric blue accents per research.md)
-- [ ] T087 Implement theme creation in src/ui/theme.py (create_theme with dark background, styled components)
-- [ ] T088 Create main application controller in src/ui/app.py (initialize DearPyGui, apply theme, main loop)
-- [ ] T089 Create main window layout in src/ui/main_window.py (sidebar navigation, content area, status bar)
+- [x] T086 Create theme constants in src/ui/theme.py (COLORS dict with cyan/electric blue accents per research.md)
+- [x] T087 Implement theme creation in src/ui/theme.py (create_theme with dark background, styled components)
+- [x] T088 Create main application controller in src/ui/app.py (initialize DearPyGui, apply theme, main loop)
+- [x] T089 Create main window layout in src/ui/main_window.py (sidebar navigation, content area, status bar)
 
 ### Dialogs
 
@@ -297,7 +297,7 @@
 - [ ] T102 Wire views to navigation in main_window.py
 - [ ] T103 Connect UI to ServiceContainer (inject services via controller)
 - [ ] T104 Implement idle activity tracking for auto-lock (reset timer on user input)
-- [ ] T105 Create src/ui/__init__.py exporting app module
+- [x] T105 Create src/ui/__init__.py exporting app module
 - [ ] T106 Create application entry point in src/main.py
 
 ---
