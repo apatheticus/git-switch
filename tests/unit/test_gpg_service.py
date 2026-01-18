@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def gpg_service() -> "GPGService":
+def gpg_service() -> GPGService:
     """Create a GPGService instance for testing."""
     from src.services.gpg_service import GPGService
 
@@ -64,9 +64,7 @@ mQENBGYtest...
 class TestIsGPGInstalled:
     """Tests for is_gpg_installed() method."""
 
-    def test_is_gpg_installed_returns_true_when_available(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_is_gpg_installed_returns_true_when_available(self, gpg_service: GPGService) -> None:
         """is_gpg_installed should return True when gpg is in PATH."""
         with patch("shutil.which") as mock_which:
             mock_which.return_value = "/usr/bin/gpg"
@@ -76,9 +74,7 @@ class TestIsGPGInstalled:
             assert result is True
             mock_which.assert_called_once_with("gpg")
 
-    def test_is_gpg_installed_returns_false_when_missing(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_is_gpg_installed_returns_false_when_missing(self, gpg_service: GPGService) -> None:
         """is_gpg_installed should return False when gpg is not in PATH."""
         with patch("shutil.which") as mock_which:
             mock_which.return_value = None
@@ -96,9 +92,7 @@ class TestIsGPGInstalled:
 class TestListKeys:
     """Tests for list_keys() method."""
 
-    def test_list_keys_returns_keyring_contents(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_list_keys_returns_keyring_contents(self, gpg_service: GPGService) -> None:
         """list_keys should return all keys in the GPG keyring."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_gpg.list_keys.return_value = [
@@ -120,9 +114,7 @@ class TestListKeys:
             assert result[0]["keyid"] == "ABCD1234EFGH5678"
             assert result[1]["keyid"] == "WXYZ9876QRST4321"
 
-    def test_list_keys_returns_empty_when_no_keys(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_list_keys_returns_empty_when_no_keys(self, gpg_service: GPGService) -> None:
         """list_keys should return empty list when keyring is empty."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_gpg.list_keys.return_value = []
@@ -141,7 +133,7 @@ class TestImportKey:
     """Tests for import_key() method."""
 
     def test_import_key_imports_private_key(
-        self, gpg_service: "GPGService", sample_gpg_private_key: bytes
+        self, gpg_service: GPGService, sample_gpg_private_key: bytes
     ) -> None:
         """import_key should import a GPG private key into the keyring."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
@@ -156,9 +148,7 @@ class TestImportKey:
             assert len(result) >= 8  # Key IDs are typically at least 8 chars
             mock_gpg.import_keys.assert_called_once()
 
-    def test_import_key_returns_none_on_failure(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_import_key_returns_none_on_failure(self, gpg_service: GPGService) -> None:
         """import_key should return None if import fails."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_result = MagicMock()
@@ -179,12 +169,12 @@ class TestImportKey:
 class TestExportKey:
     """Tests for export_key() method."""
 
-    def test_export_key_returns_armored_key(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_export_key_returns_armored_key(self, gpg_service: GPGService) -> None:
         """export_key should return an ASCII-armored key by default."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
-            armored_key = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+            armored_key = (
+                b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+            )
             mock_gpg.export_keys.return_value = armored_key.decode("utf-8")
 
             result = gpg_service.export_key("ABCD1234EFGH5678", armor=True)
@@ -192,9 +182,7 @@ class TestExportKey:
             assert result is not None
             assert b"BEGIN PGP" in result
 
-    def test_export_key_returns_none_for_nonexistent_key(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_export_key_returns_none_for_nonexistent_key(self, gpg_service: GPGService) -> None:
         """export_key should return None if key doesn't exist."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_gpg.export_keys.return_value = ""
@@ -212,9 +200,7 @@ class TestExportKey:
 class TestDeleteKey:
     """Tests for delete_key() method."""
 
-    def test_delete_key_removes_from_keyring(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_delete_key_removes_from_keyring(self, gpg_service: GPGService) -> None:
         """delete_key should remove the specified key from the keyring."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_result = MagicMock()
@@ -226,9 +212,7 @@ class TestDeleteKey:
             assert result is True
             mock_gpg.delete_keys.assert_called()
 
-    def test_delete_key_returns_false_for_nonexistent_key(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_delete_key_returns_false_for_nonexistent_key(self, gpg_service: GPGService) -> None:
         """delete_key should return False if key doesn't exist."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
             mock_result = MagicMock()
@@ -249,7 +233,7 @@ class TestVerifySigningCapability:
     """Tests for verify_signing_capability() method."""
 
     def test_verify_signing_capability_returns_true_for_signing_key(
-        self, gpg_service: "GPGService"
+        self, gpg_service: GPGService
     ) -> None:
         """verify_signing_capability should return True for keys that can sign."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
@@ -266,7 +250,7 @@ class TestVerifySigningCapability:
             assert result is True
 
     def test_verify_signing_capability_returns_false_for_encrypt_only_key(
-        self, gpg_service: "GPGService"
+        self, gpg_service: GPGService
     ) -> None:
         """verify_signing_capability should return False for keys without sign capability."""
         with patch.object(gpg_service, "_gpg") as mock_gpg:
@@ -291,7 +275,7 @@ class TestValidateKey:
     """Tests for validate_key() method."""
 
     def test_validate_key_extracts_key_id(
-        self, gpg_service: "GPGService", sample_gpg_private_key: bytes
+        self, gpg_service: GPGService, sample_gpg_private_key: bytes
     ) -> None:
         """validate_key should extract key ID from a valid GPG key."""
         # Skip if GPG is not available
@@ -310,9 +294,7 @@ class TestValidateKey:
             assert key_id != ""
             assert error == ""
 
-    def test_validate_key_rejects_invalid_key(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_validate_key_rejects_invalid_key(self, gpg_service: GPGService) -> None:
         """validate_key should reject invalid GPG key data."""
         # Skip if GPG is not available
         if gpg_service._gpg is None:
@@ -355,9 +337,7 @@ class TestValidateKey:
 class TestGPGServiceErrorHandling:
     """Tests for error handling in GPGService."""
 
-    def test_list_keys_handles_gpg_error(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_list_keys_handles_gpg_error(self, gpg_service: GPGService) -> None:
         """list_keys should handle GPG errors gracefully."""
         from src.models.exceptions import GPGServiceError
 
@@ -367,9 +347,7 @@ class TestGPGServiceErrorHandling:
             with pytest.raises(GPGServiceError):
                 gpg_service.list_keys()
 
-    def test_import_key_handles_gpg_error(
-        self, gpg_service: "GPGService"
-    ) -> None:
+    def test_import_key_handles_gpg_error(self, gpg_service: GPGService) -> None:
         """import_key should handle GPG errors gracefully."""
         from src.models.exceptions import GPGServiceError
 

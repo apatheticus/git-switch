@@ -17,25 +17,25 @@ import dearpygui.dearpygui as dpg
 # Dark cyberpunk color palette
 COLORS: Final[dict[str, tuple[int, int, int] | tuple[int, int, int, int]]] = {
     # Backgrounds
-    "bg_dark": (15, 23, 42),           # #0F172A - Window background
-    "bg_panel": (30, 41, 59),          # #1E293B - Panel/sidebar background
-    "bg_card": (51, 65, 85),           # #334155 - Card background
-    "bg_input": (71, 85, 105),         # #475569 - Input field background
+    "bg_dark": (15, 23, 42),  # #0F172A - Window background
+    "bg_panel": (30, 41, 59),  # #1E293B - Panel/sidebar background
+    "bg_card": (51, 65, 85),  # #334155 - Card background
+    "bg_input": (71, 85, 105),  # #475569 - Input field background
     # Accents
-    "accent_cyan": (0, 212, 255),      # #00D4FF - Primary accent
+    "accent_cyan": (0, 212, 255),  # #00D4FF - Primary accent
     "accent_glow": (0, 255, 255, 80),  # #00FFFF with alpha - Glow effect
-    "accent_hover": (56, 189, 248),    # #38BDF8 - Lighter cyan for hover
+    "accent_hover": (56, 189, 248),  # #38BDF8 - Lighter cyan for hover
     # Text
-    "text_primary": (241, 245, 249),   # #F1F5F9 - Primary text
-    "text_secondary": (148, 163, 184), # #94A3B8 - Secondary text
+    "text_primary": (241, 245, 249),  # #F1F5F9 - Primary text
+    "text_secondary": (148, 163, 184),  # #94A3B8 - Secondary text
     "text_disabled": (100, 116, 139),  # #64748B - Disabled text
     # Status indicators
-    "success": (34, 197, 94),          # #22C55E - Success indicator
-    "warning": (234, 179, 8),          # #EAB308 - Warning indicator
-    "error": (239, 68, 68),            # #EF4444 - Error indicator
+    "success": (34, 197, 94),  # #22C55E - Success indicator
+    "warning": (234, 179, 8),  # #EAB308 - Warning indicator
+    "error": (239, 68, 68),  # #EF4444 - Error indicator
     # Borders and separators
-    "border": (71, 85, 105),           # #475569 - Border color
-    "separator": (51, 65, 85),         # #334155 - Separator line
+    "border": (71, 85, 105),  # #475569 - Border color
+    "separator": (51, 65, 85),  # #334155 - Separator line
 }
 
 
@@ -96,186 +96,186 @@ TAGS: Final[dict[str, str]] = {
 # Theme Creation
 # =============================================================================
 
+
 def create_theme() -> int:
     """Create and return the dark cyberpunk theme.
 
     Returns:
         Theme tag ID for use with dpg.bind_theme().
     """
-    with dpg.theme() as global_theme:
-        with dpg.theme_component(dpg.mvAll):
-            # Window and panel backgrounds
-            dpg.add_theme_color(
-                dpg.mvThemeCol_WindowBg,
-                COLORS["bg_dark"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ChildBg,
-                COLORS["bg_panel"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_PopupBg,
-                COLORS["bg_panel"],
-            )
+    with dpg.theme() as global_theme, dpg.theme_component(dpg.mvAll):
+        # Window and panel backgrounds
+        dpg.add_theme_color(
+            dpg.mvThemeCol_WindowBg,
+            COLORS["bg_dark"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ChildBg,
+            COLORS["bg_panel"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_PopupBg,
+            COLORS["bg_panel"],
+        )
 
-            # Frame/input backgrounds
-            dpg.add_theme_color(
-                dpg.mvThemeCol_FrameBg,
-                COLORS["bg_input"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_FrameBgHovered,
-                COLORS["bg_card"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_FrameBgActive,
-                COLORS["accent_cyan"],
-            )
+        # Frame/input backgrounds
+        dpg.add_theme_color(
+            dpg.mvThemeCol_FrameBg,
+            COLORS["bg_input"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_FrameBgHovered,
+            COLORS["bg_card"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_FrameBgActive,
+            COLORS["accent_cyan"],
+        )
 
-            # Button styling
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Button,
-                COLORS["bg_card"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonHovered,
-                COLORS["accent_cyan"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonActive,
-                COLORS["accent_hover"],
-            )
+        # Button styling
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Button,
+            COLORS["bg_card"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonHovered,
+            COLORS["accent_cyan"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonActive,
+            COLORS["accent_hover"],
+        )
 
-            # Header styling
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Header,
-                COLORS["bg_card"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_HeaderHovered,
-                COLORS["accent_cyan"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_HeaderActive,
-                COLORS["accent_hover"],
-            )
+        # Header styling
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Header,
+            COLORS["bg_card"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_HeaderHovered,
+            COLORS["accent_cyan"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_HeaderActive,
+            COLORS["accent_hover"],
+        )
 
-            # Text colors
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Text,
-                COLORS["text_primary"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_TextDisabled,
-                COLORS["text_disabled"],
-            )
+        # Text colors
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Text,
+            COLORS["text_primary"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_TextDisabled,
+            COLORS["text_disabled"],
+        )
 
-            # Borders
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Border,
-                COLORS["border"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Separator,
-                COLORS["separator"],
-            )
+        # Borders
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Border,
+            COLORS["border"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Separator,
+            COLORS["separator"],
+        )
 
-            # Scrollbar
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ScrollbarBg,
-                COLORS["bg_dark"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ScrollbarGrab,
-                COLORS["bg_card"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ScrollbarGrabHovered,
-                COLORS["accent_cyan"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ScrollbarGrabActive,
-                COLORS["accent_hover"],
-            )
+        # Scrollbar
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ScrollbarBg,
+            COLORS["bg_dark"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ScrollbarGrab,
+            COLORS["bg_card"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ScrollbarGrabHovered,
+            COLORS["accent_cyan"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ScrollbarGrabActive,
+            COLORS["accent_hover"],
+        )
 
-            # Title bar
-            dpg.add_theme_color(
-                dpg.mvThemeCol_TitleBg,
-                COLORS["bg_dark"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_TitleBgActive,
-                COLORS["bg_panel"],
-            )
+        # Title bar
+        dpg.add_theme_color(
+            dpg.mvThemeCol_TitleBg,
+            COLORS["bg_dark"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_TitleBgActive,
+            COLORS["bg_panel"],
+        )
 
-            # Tab styling
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Tab,
-                COLORS["bg_card"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_TabHovered,
-                COLORS["accent_cyan"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_TabActive,
-                COLORS["accent_cyan"],
-            )
+        # Tab styling
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Tab,
+            COLORS["bg_card"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_TabHovered,
+            COLORS["accent_cyan"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_TabActive,
+            COLORS["accent_cyan"],
+        )
 
-            # Checkbox/radio styling
-            dpg.add_theme_color(
-                dpg.mvThemeCol_CheckMark,
-                COLORS["accent_cyan"],
-            )
+        # Checkbox/radio styling
+        dpg.add_theme_color(
+            dpg.mvThemeCol_CheckMark,
+            COLORS["accent_cyan"],
+        )
 
-            # Slider styling
-            dpg.add_theme_color(
-                dpg.mvThemeCol_SliderGrab,
-                COLORS["accent_cyan"],
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_SliderGrabActive,
-                COLORS["accent_hover"],
-            )
+        # Slider styling
+        dpg.add_theme_color(
+            dpg.mvThemeCol_SliderGrab,
+            COLORS["accent_cyan"],
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_SliderGrabActive,
+            COLORS["accent_hover"],
+        )
 
-            # Style - rounding
-            dpg.add_theme_style(
-                dpg.mvStyleVar_FrameRounding,
-                FRAME_ROUNDING,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_WindowRounding,
-                FRAME_ROUNDING,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_ChildRounding,
-                FRAME_ROUNDING,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_PopupRounding,
-                FRAME_ROUNDING,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_ScrollbarRounding,
-                FRAME_ROUNDING,
-            )
+        # Style - rounding
+        dpg.add_theme_style(
+            dpg.mvStyleVar_FrameRounding,
+            FRAME_ROUNDING,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_WindowRounding,
+            FRAME_ROUNDING,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_ChildRounding,
+            FRAME_ROUNDING,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_PopupRounding,
+            FRAME_ROUNDING,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_ScrollbarRounding,
+            FRAME_ROUNDING,
+        )
 
-            # Style - padding and spacing
-            dpg.add_theme_style(
-                dpg.mvStyleVar_WindowPadding,
-                PADDING_MEDIUM,
-                PADDING_MEDIUM,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_FramePadding,
-                PADDING_SMALL,
-                PADDING_SMALL,
-            )
-            dpg.add_theme_style(
-                dpg.mvStyleVar_ItemSpacing,
-                PADDING_SMALL,
-                PADDING_SMALL,
-            )
+        # Style - padding and spacing
+        dpg.add_theme_style(
+            dpg.mvStyleVar_WindowPadding,
+            PADDING_MEDIUM,
+            PADDING_MEDIUM,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_FramePadding,
+            PADDING_SMALL,
+            PADDING_SMALL,
+        )
+        dpg.add_theme_style(
+            dpg.mvStyleVar_ItemSpacing,
+            PADDING_SMALL,
+            PADDING_SMALL,
+        )
 
     return global_theme
 
@@ -286,24 +286,23 @@ def create_nav_button_theme() -> int:
     Returns:
         Theme tag ID for navigation buttons.
     """
-    with dpg.theme() as nav_theme:
-        with dpg.theme_component(dpg.mvButton):
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Button,
-                (0, 0, 0, 0),  # Transparent background
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonHovered,
-                (*COLORS["accent_cyan"][:3], 40),  # Cyan with low alpha
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonActive,
-                (*COLORS["accent_cyan"][:3], 80),  # Cyan with medium alpha
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Text,
-                COLORS["text_secondary"],
-            )
+    with dpg.theme() as nav_theme, dpg.theme_component(dpg.mvButton):
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Button,
+            (0, 0, 0, 0),  # Transparent background
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonHovered,
+            (*COLORS["accent_cyan"][:3], 40),  # Cyan with low alpha
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonActive,
+            (*COLORS["accent_cyan"][:3], 80),  # Cyan with medium alpha
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Text,
+            COLORS["text_secondary"],
+        )
     return nav_theme
 
 
@@ -313,24 +312,23 @@ def create_active_nav_button_theme() -> int:
     Returns:
         Theme tag ID for active navigation button.
     """
-    with dpg.theme() as active_theme:
-        with dpg.theme_component(dpg.mvButton):
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Button,
-                (*COLORS["accent_cyan"][:3], 60),
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonHovered,
-                (*COLORS["accent_cyan"][:3], 80),
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_ButtonActive,
-                (*COLORS["accent_cyan"][:3], 100),
-            )
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Text,
-                COLORS["accent_cyan"],
-            )
+    with dpg.theme() as active_theme, dpg.theme_component(dpg.mvButton):
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Button,
+            (*COLORS["accent_cyan"][:3], 60),
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonHovered,
+            (*COLORS["accent_cyan"][:3], 80),
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_ButtonActive,
+            (*COLORS["accent_cyan"][:3], 100),
+        )
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Text,
+            COLORS["accent_cyan"],
+        )
     return active_theme
 
 
@@ -345,32 +343,31 @@ def create_status_theme(status: str) -> int:
     """
     color = COLORS.get(status, COLORS["text_secondary"])
 
-    with dpg.theme() as status_theme:
-        with dpg.theme_component(dpg.mvText):
-            dpg.add_theme_color(
-                dpg.mvThemeCol_Text,
-                color,
-            )
+    with dpg.theme() as status_theme, dpg.theme_component(dpg.mvText):
+        dpg.add_theme_color(
+            dpg.mvThemeCol_Text,
+            color,
+        )
     return status_theme
 
 
 __all__ = [
+    "APP_HEIGHT",
+    "APP_WIDTH",
+    "BUTTON_ROUNDING",
     # Constants
     "COLORS",
-    "APP_WIDTH",
-    "APP_HEIGHT",
-    "SIDEBAR_WIDTH",
-    "HEADER_HEIGHT",
     "FOOTER_HEIGHT",
+    "FRAME_ROUNDING",
+    "HEADER_HEIGHT",
     "PADDING_LARGE",
     "PADDING_MEDIUM",
     "PADDING_SMALL",
-    "FRAME_ROUNDING",
-    "BUTTON_ROUNDING",
+    "SIDEBAR_WIDTH",
     "TAGS",
+    "create_active_nav_button_theme",
+    "create_nav_button_theme",
+    "create_status_theme",
     # Theme functions
     "create_theme",
-    "create_nav_button_theme",
-    "create_active_nav_button_theme",
-    "create_status_theme",
 ]

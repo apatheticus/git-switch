@@ -335,7 +335,7 @@ def _on_folder_selected(_sender: int, app_data: dict[str, Any]) -> None:
             return
 
         # Register the repository
-        _container.repository_manager.register_repository(path)
+        _container.repository_manager.add_repository(path)
         logger.info(f"Registered repository: {folder_path}")
         refresh_repositories()
 
@@ -354,8 +354,8 @@ def _on_remove_repository(repo: Repository) -> None:
     show_confirm_dialog(
         title="Remove Repository",
         message=f"Remove '{repo.name}' from Git-Switch?\n\n"
-                "This only removes the registration. The repository "
-                "files will not be affected.",
+        "This only removes the registration. The repository "
+        "files will not be affected.",
         on_confirm=lambda: _handle_repository_remove(repo),
         on_cancel=None,
         confirm_label="Remove",
@@ -376,7 +376,7 @@ def _handle_repository_remove(repo: Repository) -> None:
         return
 
     try:
-        _container.repository_manager.unregister_repository(repo.id)
+        _container.repository_manager.remove_repository(repo.id)
         logger.info(f"Removed repository: {repo.name}")
         refresh_repositories()
 

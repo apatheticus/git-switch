@@ -50,7 +50,7 @@ def mock_gpg_service() -> MagicMock:
 def validation_service(
     mock_ssh_service: MagicMock,
     mock_gpg_service: MagicMock,
-) -> "ValidationService":
+) -> ValidationService:
     """Create a ValidationService instance for testing."""
     from src.core.validation import ValidationService
 
@@ -97,7 +97,7 @@ class TestValidateSSHKey:
 
     def test_validate_ssh_key_valid_rsa_key_returns_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -115,7 +115,7 @@ class TestValidateSSHKey:
 
     def test_validate_ssh_key_valid_ed25519_key_returns_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -133,7 +133,7 @@ class TestValidateSSHKey:
 
     def test_validate_ssh_key_invalid_format_returns_error(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -153,7 +153,7 @@ class TestValidateSSHKey:
 
     def test_validate_ssh_key_with_passphrase_returns_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -174,7 +174,7 @@ class TestValidateSSHKey:
 
     def test_validate_ssh_key_wrong_passphrase_returns_error(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -205,7 +205,7 @@ class TestValidateSSHConnection:
 
     def test_validate_ssh_connection_success_returns_username(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
     ) -> None:
         """validate_ssh_connection should return success with username."""
@@ -221,7 +221,7 @@ class TestValidateSSHConnection:
 
     def test_validate_ssh_connection_failure_returns_error(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
     ) -> None:
         """validate_ssh_connection should return error on failure."""
@@ -237,7 +237,7 @@ class TestValidateSSHConnection:
 
     def test_validate_ssh_connection_uses_specified_host(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
     ) -> None:
         """validate_ssh_connection should test against specified host."""
@@ -249,7 +249,7 @@ class TestValidateSSHConnection:
 
     def test_validate_ssh_connection_defaults_to_github(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
     ) -> None:
         """validate_ssh_connection should default to github.com."""
@@ -270,16 +270,14 @@ class TestValidateGPGKey:
 
     def test_validate_gpg_key_valid_key_returns_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
         sample_gpg_private_key: bytes,
     ) -> None:
         """validate_gpg_key should return success for valid key."""
         mock_gpg_service.validate_key.return_value = (True, "ABCD1234EFGH5678", "")
 
-        valid, key_id, message = validation_service.validate_gpg_key(
-            sample_gpg_private_key
-        )
+        valid, key_id, message = validation_service.validate_gpg_key(sample_gpg_private_key)
 
         assert valid is True
         assert key_id == "ABCD1234EFGH5678"
@@ -287,7 +285,7 @@ class TestValidateGPGKey:
 
     def test_validate_gpg_key_invalid_format_returns_error(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
     ) -> None:
         """validate_gpg_key should return error for invalid format."""
@@ -297,9 +295,7 @@ class TestValidateGPGKey:
             "Invalid key format",
         )
 
-        valid, key_id, message = validation_service.validate_gpg_key(
-            b"not a valid gpg key"
-        )
+        valid, key_id, message = validation_service.validate_gpg_key(b"not a valid gpg key")
 
         assert valid is False
         assert key_id == ""
@@ -307,7 +303,7 @@ class TestValidateGPGKey:
 
     def test_validate_gpg_key_returns_key_id(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
         sample_gpg_private_key: bytes,
     ) -> None:
@@ -315,9 +311,7 @@ class TestValidateGPGKey:
         expected_key_id = "1234567890ABCDEF"
         mock_gpg_service.validate_key.return_value = (True, expected_key_id, "")
 
-        valid, key_id, message = validation_service.validate_gpg_key(
-            sample_gpg_private_key
-        )
+        valid, key_id, message = validation_service.validate_gpg_key(sample_gpg_private_key)
 
         assert valid is True
         assert key_id == expected_key_id
@@ -355,7 +349,7 @@ class TestValidateGPGSigning:
 
     def test_validate_gpg_signing_capable_key_returns_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
     ) -> None:
         """validate_gpg_signing should return success for signing-capable key."""
@@ -368,7 +362,7 @@ class TestValidateGPGSigning:
 
     def test_validate_gpg_signing_incapable_key_returns_error(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
     ) -> None:
         """validate_gpg_signing should return error for non-signing key."""
@@ -381,7 +375,7 @@ class TestValidateGPGSigning:
 
     def test_validate_gpg_signing_uses_correct_key_id(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
     ) -> None:
         """validate_gpg_signing should verify the specified key ID."""
@@ -403,7 +397,7 @@ class TestValidateAll:
 
     def test_validate_all_valid_returns_all_success(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         mock_gpg_service: MagicMock,
         sample_ssh_private_key: bytes,
@@ -431,7 +425,7 @@ class TestValidateAll:
 
     def test_validate_all_partial_validation_flags(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         mock_gpg_service: MagicMock,
         sample_ssh_private_key: bytes,
@@ -457,7 +451,7 @@ class TestValidateAll:
 
     def test_validate_all_ssh_only(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -479,7 +473,7 @@ class TestValidateAll:
 
     def test_validate_all_with_passphrase(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -509,7 +503,7 @@ class TestValidationErrorHandling:
 
     def test_validation_handles_ssh_service_exception(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
@@ -527,16 +521,14 @@ class TestValidationErrorHandling:
 
     def test_validation_handles_gpg_service_exception(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_gpg_service: MagicMock,
         sample_gpg_private_key: bytes,
     ) -> None:
         """Validation should handle GPG service exceptions gracefully."""
         mock_gpg_service.validate_key.side_effect = Exception("GPG error")
 
-        valid, key_id, message = validation_service.validate_gpg_key(
-            sample_gpg_private_key
-        )
+        valid, key_id, message = validation_service.validate_gpg_key(sample_gpg_private_key)
 
         assert valid is False
         assert key_id == ""
@@ -544,7 +536,7 @@ class TestValidationErrorHandling:
 
     def test_validation_handles_connection_timeout(
         self,
-        validation_service: "ValidationService",
+        validation_service: ValidationService,
         mock_ssh_service: MagicMock,
     ) -> None:
         """Validation should handle connection timeout gracefully."""
@@ -577,9 +569,7 @@ class TestProfileManagerValidateCredentials:
         """Create a mock CryptoService."""
         mock = MagicMock()
         mock.encrypt.side_effect = lambda data, key: b"ENC:" + data
-        mock.decrypt.side_effect = (
-            lambda data, key: data[4:] if data.startswith(b"ENC:") else data
-        )
+        mock.decrypt.side_effect = lambda data, key: data[4:] if data.startswith(b"ENC:") else data
         return mock
 
     @pytest.fixture

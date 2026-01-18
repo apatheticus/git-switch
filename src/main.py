@@ -12,6 +12,10 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.services.container import ServiceContainer
 
 # Setup logging before importing application modules
 logging.basicConfig(
@@ -89,7 +93,7 @@ def get_icon_path() -> Path | None:
     return None
 
 
-def create_service_container() -> "ServiceContainer":
+def create_service_container() -> ServiceContainer:
     """Create and initialize the service container.
 
     Returns:

@@ -8,7 +8,7 @@ flexible integration with the main window.
 from __future__ import annotations
 
 import logging
-from typing import Final
+from typing import Any, Final
 
 import dearpygui.dearpygui as dpg
 
@@ -54,7 +54,7 @@ def create_status_bar(parent: int | None = None) -> int:
 
     logger.debug("Creating status bar")
 
-    bar_kwargs: dict = {
+    bar_kwargs: dict[str, Any] = {
         "tag": STATUS_BAR_TAG,
         "height": FOOTER_HEIGHT,
         "no_scrollbar": True,
@@ -63,45 +63,44 @@ def create_status_bar(parent: int | None = None) -> int:
     if parent is not None:
         bar_kwargs["parent"] = parent
 
-    with dpg.child_window(**bar_kwargs) as status_bar:
-        with dpg.group(horizontal=True):
-            # SSH status
-            dpg.add_text("SSH:", color=COLORS["text_secondary"])
-            dpg.add_text(
-                DEFAULT_SSH_STATUS,
-                tag=SSH_STATUS_TAG,
-                color=COLORS["success"],
-            )
+    with dpg.child_window(**bar_kwargs) as status_bar, dpg.group(horizontal=True):
+        # SSH status
+        dpg.add_text("SSH:", color=COLORS["text_secondary"])
+        dpg.add_text(
+            DEFAULT_SSH_STATUS,
+            tag=SSH_STATUS_TAG,
+            color=COLORS["success"],
+        )
 
-            dpg.add_spacer(width=PADDING_LARGE)
+        dpg.add_spacer(width=PADDING_LARGE)
 
-            # GPG status
-            dpg.add_text("GPG:", color=COLORS["text_secondary"])
-            dpg.add_text(
-                DEFAULT_GPG_STATUS,
-                tag=GPG_STATUS_TAG,
-                color=COLORS["text_disabled"],
-            )
+        # GPG status
+        dpg.add_text("GPG:", color=COLORS["text_secondary"])
+        dpg.add_text(
+            DEFAULT_GPG_STATUS,
+            tag=GPG_STATUS_TAG,
+            color=COLORS["text_disabled"],
+        )
 
-            dpg.add_spacer(width=PADDING_LARGE)
+        dpg.add_spacer(width=PADDING_LARGE)
 
-            # Active profile
-            dpg.add_text("Profile:", color=COLORS["text_secondary"])
-            dpg.add_text(
-                "None",
-                tag=ACTIVE_PROFILE_TAG,
-                color=COLORS["text_disabled"],
-            )
+        # Active profile
+        dpg.add_text("Profile:", color=COLORS["text_secondary"])
+        dpg.add_text(
+            "None",
+            tag=ACTIVE_PROFILE_TAG,
+            color=COLORS["text_disabled"],
+        )
 
-            dpg.add_spacer(width=PADDING_LARGE)
+        dpg.add_spacer(width=PADDING_LARGE)
 
-            # Scope indicator
-            dpg.add_text("Scope:", color=COLORS["text_secondary"])
-            dpg.add_text(
-                DEFAULT_SCOPE,
-                tag=SCOPE_TAG,
-                color=COLORS["accent_cyan"],
-            )
+        # Scope indicator
+        dpg.add_text("Scope:", color=COLORS["text_secondary"])
+        dpg.add_text(
+            DEFAULT_SCOPE,
+            tag=SCOPE_TAG,
+            color=COLORS["accent_cyan"],
+        )
 
     return status_bar
 

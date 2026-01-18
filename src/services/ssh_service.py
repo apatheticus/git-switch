@@ -7,6 +7,7 @@ OpenSSH ssh-agent service.
 from __future__ import annotations
 
 import base64
+import contextlib
 import hashlib
 import io
 import logging
@@ -78,7 +79,7 @@ class SSHService:
             logger.warning(f"Failed to start ssh-agent: {process.stderr}")
             return False
         except Exception as e:
-            logger.error(f"Failed to start ssh-agent service: {e}")
+            logger.exception(f"Failed to start ssh-agent service: {e}")
             return False
 
     def list_keys(self) -> list[str]:
@@ -105,7 +106,7 @@ class SSHService:
                 if "no identities" in process.stdout.lower():
                     return []
 
-            if process.returncode != 0 and process.returncode != 1:
+            if process.returncode not in {0, 1}:
                 raise SSHServiceError(f"ssh-add -l failed: {process.stderr}")
 
             # Parse fingerprints from output
@@ -118,7 +119,7 @@ class SSHService:
                 if len(parts) >= 2:
                     # The fingerprint is the second part
                     fp = parts[1]
-                    if fp.startswith("SHA256:") or fp.startswith("MD5:"):
+                    if fp.startswith(("SHA256:", "MD5:")):
                         fingerprints.append(fp)
 
             return fingerprints
@@ -193,9 +194,7 @@ class SSHService:
             env = os.environ.copy()
 
             # Create a temporary script to echo the passphrase
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".bat", delete=False
-            ) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".bat", delete=False) as f:
                 f.write(f"@echo off\necho {passphrase}\n")
                 askpass_script = f.name
 
@@ -219,10 +218,8 @@ class SSHService:
                 return True
             finally:
                 # Clean up askpass script
-                try:
+                with contextlib.suppress(Exception):
                     os.unlink(askpass_script)
-                except Exception:
-                    pass
 
         except SSHServiceError:
             raise
@@ -324,7 +321,7 @@ class SSHService:
 
             return f"SHA256:{fp_base64}"
         except ValueError:
-            raise SSHServiceError("Invalid public key format")
+            raise SSHServiceError("Invalid public key format") from None
         except Exception as e:
             raise SSHServiceError(f"Failed to calculate fingerprint: {e}") from e
 

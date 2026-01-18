@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def git_service() -> "GitService":
+def git_service() -> GitService:
     """Create a GitService instance for testing."""
     from src.services.git_service import GitService
 
@@ -49,7 +49,7 @@ class TestIsGitInstalled:
     """Tests for is_git_installed() method."""
 
     def test_is_git_installed_returns_true_when_git_available(
-        self, git_service: "GitService"
+        self, git_service: GitService
     ) -> None:
         """is_git_installed should return True when git is in PATH."""
         with patch("shutil.which") as mock_which:
@@ -61,7 +61,7 @@ class TestIsGitInstalled:
             mock_which.assert_called_once_with("git")
 
     def test_is_git_installed_returns_false_when_git_missing(
-        self, git_service: "GitService"
+        self, git_service: GitService
     ) -> None:
         """is_git_installed should return False when git is not in PATH."""
         with patch("shutil.which") as mock_which:
@@ -80,25 +80,15 @@ class TestIsGitInstalled:
 class TestGetGlobalConfig:
     """Tests for get_global_config() method."""
 
-    def test_get_global_config_returns_current_values(
-        self, git_service: "GitService"
-    ) -> None:
+    def test_get_global_config_returns_current_values(self, git_service: GitService) -> None:
         """get_global_config should return current global Git configuration."""
         with patch("subprocess.run") as mock_run:
             # Mock different config values for each call
             mock_results = {
-                "user.name": MagicMock(
-                    returncode=0, stdout="Test User\n", stderr=""
-                ),
-                "user.email": MagicMock(
-                    returncode=0, stdout="test@example.com\n", stderr=""
-                ),
-                "user.signingkey": MagicMock(
-                    returncode=0, stdout="ABCD1234\n", stderr=""
-                ),
-                "commit.gpgsign": MagicMock(
-                    returncode=0, stdout="true\n", stderr=""
-                ),
+                "user.name": MagicMock(returncode=0, stdout="Test User\n", stderr=""),
+                "user.email": MagicMock(returncode=0, stdout="test@example.com\n", stderr=""),
+                "user.signingkey": MagicMock(returncode=0, stdout="ABCD1234\n", stderr=""),
+                "commit.gpgsign": MagicMock(returncode=0, stdout="true\n", stderr=""),
             }
 
             def side_effect(cmd, **kwargs):
@@ -123,9 +113,7 @@ class TestGetGlobalConfig:
 class TestSetGlobalConfig:
     """Tests for set_global_config() method."""
 
-    def test_set_global_config_updates_user_name_and_email(
-        self, git_service: "GitService"
-    ) -> None:
+    def test_set_global_config_updates_user_name_and_email(self, git_service: GitService) -> None:
         """set_global_config should update user.name and user.email."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -138,11 +126,11 @@ class TestSetGlobalConfig:
             # Verify git config commands were called
             calls = mock_run.call_args_list
             assert any("user.name" in str(call) and "New User" in str(call) for call in calls)
-            assert any("user.email" in str(call) and "new@example.com" in str(call) for call in calls)
+            assert any(
+                "user.email" in str(call) and "new@example.com" in str(call) for call in calls
+            )
 
-    def test_set_global_config_with_gpg_signing(
-        self, git_service: "GitService"
-    ) -> None:
+    def test_set_global_config_with_gpg_signing(self, git_service: GitService) -> None:
         """set_global_config should set GPG signing config when provided."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -155,11 +143,13 @@ class TestSetGlobalConfig:
             )
 
             calls = mock_run.call_args_list
-            assert any("user.signingkey" in str(call) and "ABCD1234EFGH5678" in str(call) for call in calls)
+            assert any(
+                "user.signingkey" in str(call) and "ABCD1234EFGH5678" in str(call) for call in calls
+            )
             assert any("commit.gpgsign" in str(call) and "true" in str(call) for call in calls)
 
     def test_set_global_config_unsets_signing_key_when_none(
-        self, git_service: "GitService"
+        self, git_service: GitService
     ) -> None:
         """set_global_config should unset signing key when None provided."""
         with patch("subprocess.run") as mock_run:
@@ -187,17 +177,13 @@ class TestGetLocalConfig:
     """Tests for get_local_config() method."""
 
     def test_get_local_config_returns_repository_values(
-        self, git_service: "GitService", mock_git_repo: Path
+        self, git_service: GitService, mock_git_repo: Path
     ) -> None:
         """get_local_config should return local repository configuration."""
         with patch("subprocess.run") as mock_run:
             mock_results = {
-                "user.name": MagicMock(
-                    returncode=0, stdout="Repo User\n", stderr=""
-                ),
-                "user.email": MagicMock(
-                    returncode=0, stdout="repo@example.com\n", stderr=""
-                ),
+                "user.name": MagicMock(returncode=0, stdout="Repo User\n", stderr=""),
+                "user.email": MagicMock(returncode=0, stdout="repo@example.com\n", stderr=""),
             }
 
             def side_effect(cmd, **kwargs):
@@ -221,7 +207,7 @@ class TestSetLocalConfig:
     """Tests for set_local_config() method."""
 
     def test_set_local_config_updates_repository_config(
-        self, git_service: "GitService", mock_git_repo: Path
+        self, git_service: GitService, mock_git_repo: Path
     ) -> None:
         """set_local_config should update repository-specific configuration."""
         with patch("subprocess.run") as mock_run:
@@ -239,7 +225,7 @@ class TestSetLocalConfig:
             assert any("user.name" in str(call) for call in calls)
 
     def test_set_local_config_raises_invalid_repository_error(
-        self, git_service: "GitService", temp_dir: Path
+        self, git_service: GitService, temp_dir: Path
     ) -> None:
         """set_local_config should raise InvalidRepositoryError for non-repo path."""
         from src.models.exceptions import InvalidRepositoryError
@@ -259,7 +245,7 @@ class TestSetLocalConfigWithGPG:
     """Tests for set_local_config with GPG settings."""
 
     def test_set_local_config_with_gpg_signing(
-        self, git_service: "GitService", mock_git_repo: Path
+        self, git_service: GitService, mock_git_repo: Path
     ) -> None:
         """set_local_config should handle GPG signing configuration."""
         with patch("subprocess.run") as mock_run:

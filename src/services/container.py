@@ -60,14 +60,60 @@ def create_container() -> ServiceContainer:
 
     Returns:
         ServiceContainer configured with production service implementations.
-
-    Note:
-        This function will be implemented when concrete service classes
-        are available. Currently raises NotImplementedError.
     """
-    # TODO: Implement when concrete services are created
-    raise NotImplementedError(
-        "Production container requires concrete service implementations"
+    # Import concrete implementations
+    from src.core.crypto import CryptoService
+    from src.core.profile_manager import ProfileManager
+    from src.core.repository_manager import RepositoryManager
+    from src.core.session import SessionManager
+    from src.core.settings_manager import SettingsManager
+    from src.services.credential_service import CredentialService
+    from src.services.git_service import GitService
+    from src.services.gpg_service import GPGService
+    from src.services.ssh_service import SSHService
+
+    # Load settings to get auto-lock timeout
+    settings_manager = SettingsManager()
+    settings = settings_manager.load_settings()
+
+    # Create service instances (order matters for dependencies)
+    git_service = GitService()
+    ssh_service = SSHService()
+    gpg_service = GPGService()
+    credential_service = CredentialService()
+    crypto_service = CryptoService()
+
+    # Create session manager with crypto service
+    session_manager = SessionManager(
+        crypto_service=crypto_service,
+        auto_lock_timeout=settings.auto_lock_timeout,
+    )
+
+    # Create profile manager with all dependencies
+    profile_manager = ProfileManager(
+        crypto_service=crypto_service,
+        session_manager=session_manager,
+        git_service=git_service,
+        ssh_service=ssh_service,
+        gpg_service=gpg_service,
+        credential_service=credential_service,
+    )
+
+    # Create repository manager
+    repository_manager = RepositoryManager(
+        git_service=git_service,
+        profile_manager=profile_manager,
+    )
+
+    return ServiceContainer(
+        git_service=git_service,
+        ssh_service=ssh_service,
+        gpg_service=gpg_service,
+        credential_service=credential_service,
+        crypto_service=crypto_service,
+        session_manager=session_manager,
+        profile_manager=profile_manager,
+        repository_manager=repository_manager,
     )
 
 

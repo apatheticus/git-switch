@@ -40,9 +40,7 @@ def mock_crypto_service() -> MagicMock:
     """Create a mock CryptoService."""
     mock = MagicMock()
     mock.encrypt.side_effect = lambda data, key: b"ENC:" + data
-    mock.decrypt.side_effect = (
-        lambda data, key: data[4:] if data.startswith(b"ENC:") else data
-    )
+    mock.decrypt.side_effect = lambda data, key: data[4:] if data.startswith(b"ENC:") else data
     return mock
 
 
@@ -124,7 +122,7 @@ def profile_manager_with_mocks(
     mock_gpg_service: MagicMock,
     mock_credential_service: MagicMock,
     temp_dir: Path,
-) -> "ProfileManager":
+) -> ProfileManager:
     """Create a ProfileManager with all mock services for integration testing."""
     from src.core.profile_manager import ProfileManager
 
@@ -165,7 +163,7 @@ class TestCompleteProfileSwitchWorkflow:
 
     def test_complete_profile_switch_workflow(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -207,7 +205,7 @@ class TestProfileSwitchCoordination:
 
     def test_profile_switch_coordinates_all_services(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -216,8 +214,12 @@ class TestProfileSwitchCoordination:
         mock_credential_service: MagicMock,
     ) -> None:
         """Profile switch should coordinate all services in correct order."""
-        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
-        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        gpg_private = (
+            b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        )
+        gpg_public = (
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        )
 
         profile = profile_manager_with_mocks.create_profile(
             name="Work",
@@ -246,7 +248,7 @@ class TestProfileSwitchRollback:
 
     def test_profile_switch_rollback_on_ssh_failure(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_ssh_service: MagicMock,
@@ -283,7 +285,7 @@ class TestMultipleProfileSwitch:
 
     def test_switch_between_profiles_deactivates_previous(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -320,7 +322,7 @@ class TestMultipleProfileSwitch:
 
     def test_switch_clears_previous_ssh_keys(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_ssh_service: MagicMock,
@@ -358,7 +360,7 @@ class TestLocalScopeSwitch:
 
     def test_local_scope_does_not_affect_global_config(
         self,
-        profile_manager_with_mocks: "ProfileManager",
+        profile_manager_with_mocks: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -377,9 +379,7 @@ class TestLocalScopeSwitch:
             ssh_public_key=sample_ssh_public_key,
         )
 
-        profile_manager_with_mocks.switch_profile(
-            profile.id, scope="local", repo_path=repo_path
-        )
+        profile_manager_with_mocks.switch_profile(profile.id, scope="local", repo_path=repo_path)
 
         # Should call set_local_config instead of set_global_config
         mock_git_service.set_local_config.assert_called_once()

@@ -119,73 +119,71 @@ def _build_header(container: ServiceContainer) -> None:
         height=HEADER_HEIGHT - PADDING_MEDIUM,
         no_scrollbar=True,
         border=False,
-    ):
-        with dpg.group(horizontal=True):
-            # Left side: Logo
-            with dpg.group():
-                dpg.add_spacer(height=PADDING_LARGE)
+    ), dpg.group(horizontal=True):
+        # Left side: Logo
+        with dpg.group():
+            dpg.add_spacer(height=PADDING_LARGE)
+            with dpg.group(horizontal=True):
                 dpg.add_text(
                     "GIT",
                     color=COLORS["text_primary"],
                 )
-                dpg.add_same_line(spacing=0)
                 dpg.add_text(
                     "-SWITCH",
                     color=COLORS["accent_cyan"],
                 )
+            dpg.add_text(
+                "Profile Manager",
+                color=COLORS["text_secondary"],
+            )
+
+        dpg.add_spacer(width=PADDING_LARGE * 3)
+
+        # Right side: Active profile card
+        with dpg.child_window(
+            tag=TAGS["active_profile_card"],
+            width=400,
+            height=HEADER_HEIGHT - PADDING_LARGE * 2,
+            border=True,
+        ), dpg.group(horizontal=True):
+            # Profile info
+            with dpg.group():
                 dpg.add_text(
-                    "Profile Manager",
+                    "ACTIVE PROFILE",
                     color=COLORS["text_secondary"],
                 )
-
-            dpg.add_spacer(width=PADDING_LARGE * 3)
-
-            # Right side: Active profile card
-            with dpg.child_window(
-                tag=TAGS["active_profile_card"],
-                width=400,
-                height=HEADER_HEIGHT - PADDING_LARGE * 2,
-                border=True,
-            ):
+                dpg.add_text(
+                    "No profile active",
+                    tag=TAGS["profile_name"],
+                    color=COLORS["text_primary"],
+                )
                 with dpg.group(horizontal=True):
-                    # Profile info
-                    with dpg.group():
-                        dpg.add_text(
-                            "ACTIVE PROFILE",
-                            color=COLORS["text_secondary"],
-                        )
-                        dpg.add_text(
-                            "No profile active",
-                            tag=TAGS["profile_name"],
-                            color=COLORS["text_primary"],
-                        )
-                        with dpg.group(horizontal=True):
-                            dpg.add_text(
-                                "---",
-                                tag=TAGS["profile_email"],
-                                color=COLORS["text_secondary"],
-                            )
-                            dpg.add_text(
-                                "",
-                                tag=TAGS["profile_org"],
-                                color=COLORS["accent_cyan"],
-                            )
+                    dpg.add_text(
+                        "---",
+                        tag=TAGS["profile_email"],
+                        color=COLORS["text_secondary"],
+                    )
+                    dpg.add_text(
+                        "",
+                        tag=TAGS["profile_org"],
+                        color=COLORS["accent_cyan"],
+                    )
 
-                    dpg.add_spacer(width=PADDING_LARGE * 2)
+            dpg.add_spacer(width=PADDING_LARGE * 2)
 
-                    # Online indicator
-                    with dpg.group():
-                        dpg.add_spacer(height=PADDING_SMALL)
-                        with dpg.group(horizontal=True):
-                            dpg.add_text(
-                                "O",  # Circle indicator (will be styled)
-                                tag=TAGS["online_indicator"],
-                                color=COLORS["success"],
-                            )
-                            dpg.add_text(
-                                "READY",
-                                color=COLORS["success"],
-                            )
+            # Online indicator
+            with dpg.group():
+                dpg.add_spacer(height=PADDING_SMALL)
+                with dpg.group(horizontal=True):
+                    dpg.add_text(
+                        "O",  # Circle indicator (will be styled)
+                        tag=TAGS["online_indicator"],
+                        color=COLORS["success"],
+                    )
+                    dpg.add_text(
+                        "READY",
+                        color=COLORS["success"],
+                    )
 
 
 def _build_sidebar() -> None:
@@ -215,7 +213,7 @@ def _build_sidebar() -> None:
             (TAGS["view_import"], "Import/Export", "import"),
         ]
 
-        for view_tag, label, key in nav_items:
+        for view_tag, label, _key in nav_items:
             btn = dpg.add_button(
                 label=f"  {label}",
                 width=SIDEBAR_WIDTH - PADDING_MEDIUM,
@@ -293,54 +291,53 @@ def _build_footer(container: ServiceContainer) -> None:
         height=FOOTER_HEIGHT,
         no_scrollbar=True,
         border=False,
-    ):
-        with dpg.group(horizontal=True):
-            # SSH status
-            dpg.add_text(
-                "SSH:",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "READY",
-                tag=TAGS["status_ssh"],
-                color=COLORS["success"],
-            )
+    ), dpg.group(horizontal=True):
+        # SSH status
+        dpg.add_text(
+            "SSH:",
+            color=COLORS["text_secondary"],
+        )
+        dpg.add_text(
+            "READY",
+            tag=TAGS["status_ssh"],
+            color=COLORS["success"],
+        )
 
-            dpg.add_spacer(width=PADDING_LARGE)
+        dpg.add_spacer(width=PADDING_LARGE)
 
-            # GPG status
-            dpg.add_text(
-                "GPG:",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "READY",
-                tag=TAGS["status_gpg"],
-                color=COLORS["success"],
-            )
+        # GPG status
+        dpg.add_text(
+            "GPG:",
+            color=COLORS["text_secondary"],
+        )
+        dpg.add_text(
+            "READY",
+            tag=TAGS["status_gpg"],
+            color=COLORS["success"],
+        )
 
-            dpg.add_spacer(width=PADDING_LARGE)
+        dpg.add_spacer(width=PADDING_LARGE)
 
-            # Scope indicator
-            dpg.add_text(
-                "Scope:",
-                color=COLORS["text_secondary"],
-            )
-            dpg.add_text(
-                "GLOBAL",
-                tag=TAGS["status_scope"],
-                color=COLORS["accent_cyan"],
-            )
+        # Scope indicator
+        dpg.add_text(
+            "Scope:",
+            color=COLORS["text_secondary"],
+        )
+        dpg.add_text(
+            "GLOBAL",
+            tag=TAGS["status_scope"],
+            color=COLORS["accent_cyan"],
+        )
 
-            # Flexible spacer to push lock button to the right
-            dpg.add_spacer(width=APP_WIDTH - 450)
+        # Flexible spacer to push lock button to the right
+        dpg.add_spacer(width=APP_WIDTH - 450)
 
-            # Lock button
-            dpg.add_button(
-                label="Lock",
-                width=80,
-                callback=_on_lock_clicked,
-            )
+        # Lock button
+        dpg.add_button(
+            label="Lock",
+            width=80,
+            callback=_on_lock_clicked,
+        )
 
 
 def _on_lock_clicked() -> None:
@@ -396,9 +393,8 @@ def _update_nav_button_themes(active_view_tag: str) -> None:
             if view_tag == active_view_tag:
                 if _nav_button_active_theme is not None:
                     dpg.bind_item_theme(btn_id, _nav_button_active_theme)
-            else:
-                if _nav_button_theme is not None:
-                    dpg.bind_item_theme(btn_id, _nav_button_theme)
+            elif _nav_button_theme is not None:
+                dpg.bind_item_theme(btn_id, _nav_button_theme)
         except Exception as e:
             logger.warning(f"Failed to update nav button theme: {e}")
 

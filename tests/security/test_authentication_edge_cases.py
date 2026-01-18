@@ -13,15 +13,15 @@ and should FAIL until the implementation is complete.
 from __future__ import annotations
 
 import json
-import secrets
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 if TYPE_CHECKING:
+    from src.core.crypto import CryptoService
     from src.core.session import SessionManager
 
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def real_crypto_service() -> "CryptoService":
+def real_crypto_service() -> CryptoService:
     """Create a real CryptoService for security tests."""
     from src.core.crypto import CryptoService
 
@@ -40,8 +40,8 @@ def real_crypto_service() -> "CryptoService":
 
 @pytest.fixture
 def session_manager_real_crypto(
-    real_crypto_service: "CryptoService", temp_dir: Path
-) -> "SessionManager":
+    real_crypto_service: CryptoService, temp_dir: Path
+) -> SessionManager:
     """Create a SessionManager with real crypto for security tests."""
     from src.core.session import SessionManager
 
@@ -60,7 +60,7 @@ class TestPasswordEdgeCases:
     """Tests for edge case password handling."""
 
     def test_empty_password_handled_safely(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Empty password should be handled without crashes."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -72,7 +72,7 @@ class TestPasswordEdgeCases:
             assert result is True
 
     def test_very_long_password_handled(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Very long password (10KB) should be handled."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -84,7 +84,7 @@ class TestPasswordEdgeCases:
             assert result is True
 
     def test_unicode_password_works(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Unicode password with emoji, CJK, and RTL should work."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -96,7 +96,7 @@ class TestPasswordEdgeCases:
             assert result is True
 
     def test_null_bytes_in_password_handled(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Password with null bytes should be handled safely."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -118,7 +118,7 @@ class TestTimingAttackResistance:
     """Tests for timing attack resistance."""
 
     def test_timing_attack_resistance(
-        self, real_crypto_service: "CryptoService", temp_dir: Path
+        self, real_crypto_service: CryptoService, temp_dir: Path
     ) -> None:
         """Password verification should use constant-time comparison."""
         from src.core.session import SessionManager
@@ -166,10 +166,9 @@ class TestSecureMemory:
     """Tests for secure memory handling."""
 
     def test_key_zeroed_after_lock(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Encryption key should be zeroed after lock."""
-        from src.core.crypto import secure_zero
 
         with patch("src.core.session.get_master_key_path") as mock_path:
             mock_path.return_value = temp_dir / "master.json"
@@ -187,7 +186,7 @@ class TestSecureMemory:
             )
 
     def test_encryption_key_not_in_error_messages(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Encryption key should never appear in error messages."""
         from src.models.exceptions import AuthenticationError
@@ -205,7 +204,7 @@ class TestSecureMemory:
                 assert b"K" * 32 not in error_str.encode()
 
     def test_password_not_stored_anywhere(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Password should never be stored in files."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -241,7 +240,7 @@ class TestSaltUniqueness:
     """Tests for salt generation uniqueness."""
 
     def test_salt_is_unique_per_setup(
-        self, real_crypto_service: "CryptoService", temp_dir: Path
+        self, real_crypto_service: CryptoService, temp_dir: Path
     ) -> None:
         """Each setup should generate a unique salt."""
         from src.core.session import SessionManager
@@ -262,7 +261,7 @@ class TestSaltUniqueness:
         assert len(set(salts)) == 5, "Salts should be unique per setup"
 
     def test_verification_hash_differs_for_different_passwords(
-        self, real_crypto_service: "CryptoService", temp_dir: Path
+        self, real_crypto_service: CryptoService, temp_dir: Path
     ) -> None:
         """Different passwords should produce different verification hashes."""
         from src.core.session import SessionManager
@@ -294,7 +293,7 @@ class TestBruteForceProtection:
     """Tests for brute force resistance (via PBKDF2 iterations)."""
 
     def test_unlock_takes_reasonable_time(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Unlock with PBKDF2 should take measurable time (>10ms) for brute force resistance."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -310,7 +309,9 @@ class TestBruteForceProtection:
             # With 100k PBKDF2 iterations, should take at least 10ms
             # This provides brute force resistance
             elapsed = end - start
-            assert elapsed >= 0.01, f"Unlock too fast ({elapsed}s), may be vulnerable to brute force"
+            assert (
+                elapsed >= 0.01
+            ), f"Unlock too fast ({elapsed}s), may be vulnerable to brute force"
 
 
 # =============================================================================
@@ -322,7 +323,7 @@ class TestAuthEdgeCases:
     """Tests for authentication edge cases."""
 
     def test_setup_password_twice_overwrites(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Setting up password twice should overwrite the first."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -338,7 +339,7 @@ class TestAuthEdgeCases:
             assert session_manager_real_crypto.unlock("second_password") is True
 
     def test_concurrent_unlock_attempts_are_safe(
-        self, session_manager_real_crypto: "SessionManager", temp_dir: Path
+        self, session_manager_real_crypto: SessionManager, temp_dir: Path
     ) -> None:
         """Concurrent unlock attempts should not cause race conditions."""
         import threading

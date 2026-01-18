@@ -6,6 +6,7 @@ Handles profile CRUD operations with encrypted storage.
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 import logging
 import struct
@@ -202,9 +203,7 @@ class ProfileManager:
         if profile.ssh_key:
             result["ssh_key"] = {
                 "fingerprint": profile.ssh_key.fingerprint,
-                "public_key": base64.b64encode(profile.ssh_key.public_key).decode(
-                    "ascii"
-                ),
+                "public_key": base64.b64encode(profile.ssh_key.public_key).decode("ascii"),
             }
 
         # GPG key metadata only (content stored in separate file)
@@ -248,15 +247,11 @@ class ProfileManager:
             ssh_key=ssh_key,
             gpg_key=gpg_key,
             created_at=deserialize_datetime(data["created_at"]),
-            last_used=(
-                deserialize_datetime(data["last_used"]) if data.get("last_used") else None
-            ),
+            last_used=(deserialize_datetime(data["last_used"]) if data.get("last_used") else None),
             is_active=data.get("is_active", False),
         )
 
-    def _load_ssh_key(
-        self, profile_id: UUID, metadata: dict[str, Any]
-    ) -> SSHKey | None:
+    def _load_ssh_key(self, profile_id: UUID, metadata: dict[str, Any]) -> SSHKey | None:
         """Load SSH key from encrypted file.
 
         Args:
@@ -279,9 +274,7 @@ class ProfileManager:
 
             private_key = base64.b64decode(key_data["private_key"])
             passphrase_encrypted = (
-                base64.b64decode(key_data["passphrase"])
-                if key_data.get("passphrase")
-                else None
+                base64.b64decode(key_data["passphrase"]) if key_data.get("passphrase") else None
             )
 
             return SSHKey(
@@ -312,9 +305,7 @@ class ProfileManager:
         # Encrypt passphrase if provided
         encrypted_passphrase = None
         if passphrase:
-            encrypted_passphrase = self._crypto.encrypt(
-                passphrase.encode("utf-8"), key
-            )
+            encrypted_passphrase = self._crypto.encrypt(passphrase.encode("utf-8"), key)
 
         key_data = {
             "private_key": base64.b64encode(encrypted_private).decode("ascii"),
@@ -359,9 +350,7 @@ class ProfileManager:
                 key_id=gpg_key.key_id,
                 private_key_encrypted=base64.b64decode(key_data["private_key"]),
                 public_key=(
-                    base64.b64decode(key_data["public_key"])
-                    if key_data.get("public_key")
-                    else None
+                    base64.b64decode(key_data["public_key"]) if key_data.get("public_key") else None
                 ),
             )
         except Exception:
@@ -389,9 +378,7 @@ class ProfileManager:
         key_data: dict[str, str | None] = {
             "private_key": base64.b64encode(encrypted_private).decode("ascii"),
             "public_key": (
-                base64.b64encode(gpg_public_key).decode("ascii")
-                if gpg_public_key
-                else None
+                base64.b64encode(gpg_public_key).decode("ascii") if gpg_public_key else None
             ),
         }
 
@@ -953,9 +940,7 @@ class ProfileManager:
             logger.warning(f"Failed to get SSH passphrase: {e}")
             return None
 
-    def _add_ssh_key_to_agent(
-        self, private_key: bytes, passphrase: str | None = None
-    ) -> None:
+    def _add_ssh_key_to_agent(self, private_key: bytes, passphrase: str | None = None) -> None:
         """Add SSH key to agent via temp file.
 
         Args:
@@ -982,10 +967,8 @@ class ProfileManager:
             logger.info("Added SSH key to agent")
         finally:
             # Securely delete temp file
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(temp_path)
-            except Exception:
-                pass
 
     def _decrypt_gpg_key(self, profile_id: UUID, gpg_key: GPGKey) -> bytes | None:
         """Decrypt the GPG private key from storage.

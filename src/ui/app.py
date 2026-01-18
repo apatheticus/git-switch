@@ -7,7 +7,6 @@ for the DearPyGui-based user interface.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import dearpygui.dearpygui as dpg
@@ -17,6 +16,8 @@ from src.ui.system_tray import SystemTrayIcon
 from src.ui.theme import APP_HEIGHT, APP_WIDTH, create_theme
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from src.services.container import ServiceContainer
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ class GitSwitchApp:
             self._setup_session_callbacks()
             self._setup_system_tray()
             self._run_main_loop()
-        except Exception as e:
+        except Exception:
             logger.exception("Fatal error in application")
             raise
         finally:
@@ -137,16 +138,25 @@ class GitSwitchApp:
         activity_detected = False
 
         # Check for mouse click activity
-        if dpg.is_mouse_button_down(dpg.mvMouseButton_Left) or \
-           dpg.is_mouse_button_down(dpg.mvMouseButton_Right) or \
-           dpg.is_mouse_button_down(dpg.mvMouseButton_Middle):
+        if (
+            dpg.is_mouse_button_down(dpg.mvMouseButton_Left)
+            or dpg.is_mouse_button_down(dpg.mvMouseButton_Right)
+            or dpg.is_mouse_button_down(dpg.mvMouseButton_Middle)
+        ):
             activity_detected = True
 
         # Check for keyboard activity - common keys
         keys_to_check = [
-            dpg.mvKey_Return, dpg.mvKey_Escape, dpg.mvKey_Tab,
-            dpg.mvKey_Spacebar, dpg.mvKey_Back, dpg.mvKey_Delete,
-            dpg.mvKey_Up, dpg.mvKey_Down, dpg.mvKey_Left, dpg.mvKey_Right,
+            dpg.mvKey_Return,
+            dpg.mvKey_Escape,
+            dpg.mvKey_Tab,
+            dpg.mvKey_Spacebar,
+            dpg.mvKey_Back,
+            dpg.mvKey_Delete,
+            dpg.mvKey_Up,
+            dpg.mvKey_Down,
+            dpg.mvKey_Left,
+            dpg.mvKey_Right,
         ]
         for key in keys_to_check:
             if dpg.is_key_down(key):
@@ -156,9 +166,8 @@ class GitSwitchApp:
         # Check for mouse movement by comparing position
         if not activity_detected:
             mouse_pos = dpg.get_mouse_pos()
-            if hasattr(self, "_last_mouse_pos"):
-                if mouse_pos != self._last_mouse_pos:
-                    activity_detected = True
+            if hasattr(self, "_last_mouse_pos") and mouse_pos != self._last_mouse_pos:
+                activity_detected = True
             self._last_mouse_pos = mouse_pos
 
         # Reset idle timer on any activity

@@ -263,11 +263,15 @@ class ImportExportService:
             "created_at": profile.created_at.isoformat() if profile.created_at else None,
             "last_used": profile.last_used.isoformat() if profile.last_used else None,
             "ssh_key": {
-                "public_key": profile.ssh_key.public_key.decode("utf-8", errors="replace")
-                if profile.ssh_key else "",
+                "public_key": (
+                    profile.ssh_key.public_key.decode("utf-8", errors="replace")
+                    if profile.ssh_key
+                    else ""
+                ),
                 "fingerprint": profile.ssh_key.fingerprint if profile.ssh_key else "",
-                "has_passphrase": profile.ssh_key.passphrase_encrypted is not None
-                if profile.ssh_key else False,
+                "has_passphrase": (
+                    profile.ssh_key.passphrase_encrypted is not None if profile.ssh_key else False
+                ),
             },
             "gpg_key": {
                 "enabled": profile.gpg_key.enabled,
@@ -303,10 +307,11 @@ class ImportExportService:
             # Decrypt with session key, re-encrypt with archive key
             try:
                 decrypted_private = self._crypto.decrypt(
-                    profile.ssh_key.private_key_encrypted, session_key
+                    profile.ssh_key.private_key_encrypted,
+                    session_key,  # type: ignore[arg-type]
                 )
                 encrypted_private = self._crypto.encrypt(decrypted_private, archive_key)
-                ssh_data["private_key"] = encrypted_private.hex()
+                ssh_data["private_key"] = encrypted_private.hex()  # type: ignore[assignment]
 
                 # Clean up decrypted key
                 decrypted_array = bytearray(decrypted_private)
@@ -319,12 +324,11 @@ class ImportExportService:
             if profile.ssh_key.passphrase_encrypted:
                 try:
                     decrypted_passphrase = self._crypto.decrypt(
-                        profile.ssh_key.passphrase_encrypted, session_key
+                        profile.ssh_key.passphrase_encrypted,
+                        session_key,  # type: ignore[arg-type]
                     )
-                    encrypted_passphrase = self._crypto.encrypt(
-                        decrypted_passphrase, archive_key
-                    )
-                    ssh_data["passphrase"] = encrypted_passphrase.hex()
+                    encrypted_passphrase = self._crypto.encrypt(decrypted_passphrase, archive_key)
+                    ssh_data["passphrase"] = encrypted_passphrase.hex()  # type: ignore[assignment]
 
                     passphrase_array = bytearray(decrypted_passphrase)
                     secure_zero(passphrase_array)
@@ -337,13 +341,17 @@ class ImportExportService:
         if profile.gpg_key.enabled and profile.gpg_key.private_key_encrypted:
             gpg_data = {
                 "private_key": None,
-                "public_key": profile.gpg_key.public_key.decode("utf-8", errors="replace")
-                if profile.gpg_key.public_key else None,
+                "public_key": (
+                    profile.gpg_key.public_key.decode("utf-8", errors="replace")
+                    if profile.gpg_key.public_key
+                    else None
+                ),
             }
 
             try:
                 decrypted_gpg = self._crypto.decrypt(
-                    profile.gpg_key.private_key_encrypted, session_key
+                    profile.gpg_key.private_key_encrypted,
+                    session_key,  # type: ignore[arg-type]
                 )
                 encrypted_gpg = self._crypto.encrypt(decrypted_gpg, archive_key)
                 gpg_data["private_key"] = encrypted_gpg.hex()
@@ -368,8 +376,9 @@ class ImportExportService:
             "id": str(repo.id),
             "path": str(repo.path),
             "name": repo.name,
-            "assigned_profile_id": str(repo.assigned_profile_id)
-            if repo.assigned_profile_id else None,
+            "assigned_profile_id": (
+                str(repo.assigned_profile_id) if repo.assigned_profile_id else None
+            ),
             "use_local_config": repo.use_local_config,
         }
 
@@ -469,7 +478,7 @@ class ImportExportService:
         self,
         archive_data: bytes,
         archive_password: str,
-    ) -> tuple[list[dict], list[dict], bytes]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], bytes]:
         """Read and decrypt archive data.
 
         Args:
@@ -653,8 +662,8 @@ class ImportExportService:
                 name=new_name,
                 git_username=profile_data["git_username"],
                 git_email=profile_data["git_email"],
-                ssh_private_key=ssh_private_key,
-                ssh_public_key=ssh_public_key,
+                ssh_private_key=ssh_private_key,  # type: ignore[arg-type]
+                ssh_public_key=ssh_public_key,  # type: ignore[arg-type]
                 ssh_passphrase=ssh_passphrase.decode("utf-8") if ssh_passphrase else None,
                 gpg_enabled=gpg_enabled,
                 gpg_key_id=gpg_key_id if gpg_enabled else None,

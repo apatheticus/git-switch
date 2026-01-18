@@ -28,10 +28,10 @@ logger = logging.getLogger(__name__)
 # Internal tags for view elements (S105: these are UI tags, not passwords)
 _EXPORT_FILE_DIALOG = "export_file_dialog"
 _IMPORT_FILE_DIALOG = "import_file_dialog"
-_EXPORT_PASSWORD = "export_password_input"  # noqa: S105
-_EXPORT_CONFIRM_PASSWORD = "export_confirm_password_input"  # noqa: S105
+_EXPORT_PASSWORD = "export_password_input"
+_EXPORT_CONFIRM_PASSWORD = "export_confirm_password_input"
 _EXPORT_INCLUDE_REPOS = "export_include_repos"
-_IMPORT_PASSWORD = "import_password_input"  # noqa: S105
+_IMPORT_PASSWORD = "import_password_input"
 _IMPORT_MODE = "import_mode_combo"
 _IMPORT_CONFLICT = "import_conflict_combo"
 _STATUS_TEXT = "import_export_status_text"
@@ -463,18 +463,12 @@ def _perform_import() -> None:
         password = dpg.get_value(_IMPORT_PASSWORD) if dpg.does_item_exist(_IMPORT_PASSWORD) else ""
 
         # Get import mode
-        mode_value = (
-            dpg.get_value(_IMPORT_MODE)
-            if dpg.does_item_exist(_IMPORT_MODE)
-            else "Merge"
-        )
+        mode_value = dpg.get_value(_IMPORT_MODE) if dpg.does_item_exist(_IMPORT_MODE) else "Merge"
         mode = "merge" if mode_value == "Merge" else "replace"
 
         # Get conflict resolution
         conflict_value = (
-            dpg.get_value(_IMPORT_CONFLICT)
-            if dpg.does_item_exist(_IMPORT_CONFLICT)
-            else "Rename"
+            dpg.get_value(_IMPORT_CONFLICT) if dpg.does_item_exist(_IMPORT_CONFLICT) else "Rename"
         )
         conflict_map = {"Rename": "rename", "Skip": "skip", "Overwrite": "overwrite"}
         conflict = conflict_map.get(conflict_value, "rename")

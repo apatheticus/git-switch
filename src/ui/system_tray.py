@@ -152,14 +152,16 @@ class SystemTrayIcon:
                     items.append(
                         pystray.MenuItem(
                             "Switch Profile",
-                            pystray.Menu(*[
-                                pystray.MenuItem(
-                                    self._format_profile_label(profile),
-                                    self._make_switch_callback(profile.id),
-                                    checked=lambda _item, p=profile: p.is_active,
-                                )
-                                for profile in profiles
-                            ]),
+                            pystray.Menu(
+                                *[
+                                    pystray.MenuItem(
+                                        self._format_profile_label(profile),
+                                        self._make_switch_callback(profile.id),
+                                        checked=lambda _item, p=profile: p.is_active,
+                                    )
+                                    for profile in profiles
+                                ]
+                            ),
                         )
                     )
                 else:
@@ -240,8 +242,10 @@ class SystemTrayIcon:
         Returns:
             Callback function for the menu item.
         """
+
         def callback() -> None:
             self._on_switch_profile(profile_id)
+
         return callback
 
     def start(self) -> None:

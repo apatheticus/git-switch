@@ -26,7 +26,8 @@ wheels/
 
 # PyInstaller
 *.manifest
-*.spec
+# Keep build.spec in version control
+!build.spec
 
 # Installer logs
 pip-log.txt

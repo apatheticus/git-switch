@@ -23,7 +23,6 @@ CRED_ENUMERATE_ALL_CREDENTIALS = 1
 class SSHService:
     """Placeholder for type hint compatibility."""
 
-    pass
 
 
 class CredentialService:
@@ -140,6 +139,7 @@ class CredentialService:
         Returns:
             List of credential target names.
         """
+
         # Define credential structure
         class CREDENTIAL(ctypes.Structure):
             _fields_ = [

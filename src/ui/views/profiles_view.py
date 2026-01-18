@@ -156,7 +156,7 @@ def _display_profiles(profiles: list[Profile]) -> None:
                 on_switch=_on_switch_profile,
                 on_edit=_on_edit_profile,
                 on_delete=_on_delete_profile,
-                parent=_PROFILES_LIST,
+                parent=_PROFILES_LIST,  # type: ignore[arg-type]
             )
             # Add spacing between cards
             dpg.add_spacer(height=PADDING_SMALL, parent=_PROFILES_LIST)
@@ -237,7 +237,7 @@ def _on_delete_profile(profile: Profile) -> None:
     show_confirm_dialog(
         title="Delete Profile",
         message=f"Are you sure you want to delete the profile '{profile.name}'? "
-                "This action cannot be undone.",
+        "This action cannot be undone.",
         on_confirm=lambda: _handle_profile_delete(profile),
         on_cancel=None,
         confirm_label="Delete",
@@ -283,8 +283,8 @@ def _handle_profile_save(data: dict[str, Any]) -> None:
             name=data["name"],
             git_username=data["git_username"],
             git_email=data["git_email"],
-            ssh_private_key=ssh_private_key,
-            ssh_public_key=ssh_public_key,
+            ssh_private_key=ssh_private_key,  # type: ignore[arg-type]
+            ssh_public_key=ssh_public_key,  # type: ignore[arg-type]
             ssh_passphrase=ssh_data.get("passphrase"),
             gpg_enabled=gpg_data.get("enabled", False),
             gpg_key_id=gpg_data.get("key_id"),

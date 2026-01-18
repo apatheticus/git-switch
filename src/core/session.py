@@ -107,9 +107,7 @@ class SessionManager:
         master_path = get_master_key_path()
         content = {
             "salt": base64.b64encode(config.salt).decode("ascii"),
-            "verification_hash": base64.b64encode(config.verification_hash).decode(
-                "ascii"
-            ),
+            "verification_hash": base64.b64encode(config.verification_hash).decode("ascii"),
             "iterations": config.iterations,
         }
         master_path.write_text(json.dumps(content, indent=2), encoding="utf-8")
@@ -269,9 +267,7 @@ class SessionManager:
         # Convert minutes to seconds
         timeout_seconds = self._auto_lock_timeout * 60
 
-        self._auto_lock_timer = threading.Timer(
-            timeout_seconds, self._on_auto_lock_timeout
-        )
+        self._auto_lock_timer = threading.Timer(timeout_seconds, self._on_auto_lock_timeout)
         self._auto_lock_timer.daemon = True
         self._auto_lock_timer.start()
 

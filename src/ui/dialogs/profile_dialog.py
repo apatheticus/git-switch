@@ -363,7 +363,7 @@ def _on_file_selected(_sender: int, app_data: dict[str, Any]) -> None:
     _current_file_target = ""
 
 
-def _handle_save() -> None:  # noqa: PLR0911
+def _handle_save() -> None:
     """Handle save button click."""
     global _on_save_callback
 

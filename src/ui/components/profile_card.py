@@ -7,14 +7,13 @@ Used in the profiles list view.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import dearpygui.dearpygui as dpg
 
 from src.ui.theme import (
     COLORS,
     PADDING_MEDIUM,
-    PADDING_SMALL,
 )
 
 if TYPE_CHECKING:
@@ -41,29 +40,27 @@ def _ensure_themes() -> None:
     global _card_theme, _active_badge_theme
 
     if _card_theme is None:
-        with dpg.theme() as _card_theme:
-            with dpg.theme_component(dpg.mvChildWindow):
-                dpg.add_theme_color(
-                    dpg.mvThemeCol_ChildBg,
-                    COLORS["bg_card"],
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_ChildRounding,
-                    4,
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_WindowPadding,
-                    PADDING_MEDIUM,
-                    PADDING_MEDIUM,
-                )
+        with dpg.theme() as _card_theme, dpg.theme_component(dpg.mvChildWindow):
+            dpg.add_theme_color(
+                dpg.mvThemeCol_ChildBg,
+                COLORS["bg_card"],
+            )
+            dpg.add_theme_style(
+                dpg.mvStyleVar_ChildRounding,
+                4,
+            )
+            dpg.add_theme_style(
+                dpg.mvStyleVar_WindowPadding,
+                PADDING_MEDIUM,
+                PADDING_MEDIUM,
+            )
 
     if _active_badge_theme is None:
-        with dpg.theme() as _active_badge_theme:
-            with dpg.theme_component(dpg.mvText):
-                dpg.add_theme_color(
-                    dpg.mvThemeCol_Text,
-                    COLORS["success"],
-                )
+        with dpg.theme() as _active_badge_theme, dpg.theme_component(dpg.mvText):
+            dpg.add_theme_color(
+                dpg.mvThemeCol_Text,
+                COLORS["success"],
+            )
 
 
 def create_profile_card(
@@ -105,7 +102,7 @@ def create_profile_card(
     logger.debug(f"Creating profile card: {profile.name}")
 
     # Create card container
-    card_kwargs: dict = {
+    card_kwargs: dict[str, Any] = {
         "tag": card_tag,
         "width": CARD_WIDTH,
         "height": CARD_HEIGHT,

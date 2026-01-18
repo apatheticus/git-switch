@@ -42,7 +42,7 @@ class ValidationService:
     def validate_ssh_key(
         self,
         private_key: bytes,
-        public_key: bytes,  # noqa: ARG002
+        public_key: bytes,
         passphrase: str | None = None,
     ) -> tuple[bool, str]:
         """Validate SSH private key format and passphrase.
@@ -60,9 +60,7 @@ class ValidationService:
             return False, "SSH service not available"
 
         try:
-            valid, error = self._ssh_service.validate_private_key(
-                private_key, passphrase
-            )
+            valid, error = self._ssh_service.validate_private_key(private_key, passphrase)
         except Exception as e:
             logger.warning(f"SSH key validation error: {e}")
             return False, f"SSH validation error: {e}"
@@ -71,9 +69,7 @@ class ValidationService:
                 return True, "Valid SSH key"
             return False, error or "Invalid key format"
 
-    def validate_ssh_connection(
-        self, host: str = "github.com"
-    ) -> tuple[bool, str]:
+    def validate_ssh_connection(self, host: str = "github.com") -> tuple[bool, str]:
         """Test SSH connection to a host.
 
         Args:
@@ -94,9 +90,7 @@ class ValidationService:
         else:
             return success, message
 
-    def validate_gpg_key(
-        self, private_key: bytes
-    ) -> tuple[bool, str, str]:
+    def validate_gpg_key(self, private_key: bytes) -> tuple[bool, str, str]:
         """Validate GPG key format and extract key ID.
 
         Args:
@@ -143,7 +137,7 @@ class ValidationService:
                 return True, "Key can sign"
             return False, "Key does not have signing capability"
 
-    def validate_all(  # noqa: PLR0913
+    def validate_all(
         self,
         ssh_private_key: bytes,
         ssh_public_key: bytes,
