@@ -153,12 +153,12 @@ def show_profile_dialog(
             dpg.add_spacer(height=PADDING_MEDIUM)
 
             # SSH Key Section
-            dpg.add_text("SSH KEY *", color=COLORS["accent_cyan"])
+            dpg.add_text("SSH KEY (Optional)", color=COLORS["accent_cyan"])
             dpg.add_separator()
             dpg.add_spacer(height=PADDING_SMALL)
 
             # SSH Private Key
-            dpg.add_text("Private Key Path *", color=COLORS["text_primary"])
+            dpg.add_text("Private Key Path", color=COLORS["text_secondary"])
             with dpg.group(horizontal=True):
                 dpg.add_input_text(
                     tag=_INPUT_SSH_PRIVATE,
@@ -400,14 +400,11 @@ def _handle_save() -> None:
         _show_error("Invalid email format")
         return
 
-    if not ssh_private or not ssh_private.strip():
-        _show_error("SSH private key path is required")
-        return
-
-    # Validate SSH key file exists
-    if not Path(ssh_private).is_file():
-        _show_error("SSH private key file not found")
-        return
+    # Validate SSH key file exists only if path provided
+    if ssh_private and ssh_private.strip():
+        if not Path(ssh_private).is_file():
+            _show_error("SSH private key file not found")
+            return
 
     # Validate GPG fields if enabled
     if gpg_enabled and (not gpg_key_id or not gpg_key_id.strip()):
@@ -420,7 +417,9 @@ def _handle_save() -> None:
         "git_username": username.strip(),
         "git_email": email.strip(),
         "organization": org.strip() if org else "",
-        "ssh": {
+        "ssh": None
+        if not (ssh_private and ssh_private.strip())
+        else {
             "private_key_path": ssh_private.strip(),
             "public_key": ssh_public.strip() if ssh_public else "",
             "passphrase": ssh_passphrase if ssh_passphrase else "",

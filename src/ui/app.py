@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 import dearpygui.dearpygui as dpg
 
+from src.ui.dialogs.password_dialog import show_password_dialog
 from src.ui.main_window import create_main_window
 from src.ui.system_tray import SystemTrayIcon
 from src.ui.theme import APP_HEIGHT, APP_WIDTH, create_theme
@@ -68,6 +69,7 @@ class GitSwitchApp:
         self._is_running = False
         self._theme_id: int | None = None
         self._last_mouse_pos: tuple[float, float] = (0.0, 0.0)
+        self._auth_complete = False
 
         logger.debug("GitSwitchApp initialized")
 
@@ -81,7 +83,6 @@ class GitSwitchApp:
 
         try:
             self._setup_dearpygui()
-            self._setup_main_window()
             self._setup_session_callbacks()
             self._setup_system_tray()
             self._run_main_loop()
@@ -113,10 +114,70 @@ class GitSwitchApp:
 
         logger.debug(f"Viewport created: {APP_WIDTH}x{APP_HEIGHT}")
 
+    def _detect_and_display_current_profile(self) -> None:
+        """Detect current git profile and update UI state.
+
+        Called at startup after authentication to detect which profile
+        matches the current git global configuration. If no profile matches,
+        still displays the current git config in the header.
+        """
+        try:
+            # First try to match against saved profiles
+            detected_profile = self._profile_manager.detect_current_profile()
+            if detected_profile:
+                logger.info(
+                    f"Detected current profile at startup: {detected_profile.name}"
+                )
+                # Store for header update after window is created
+                self._detected_git_config = {
+                    "name": detected_profile.name,
+                    "email": detected_profile.git_email,
+                    "organization": detected_profile.organization,
+                    "is_profile": True,
+                }
+            else:
+                # No matching profile - get raw git config to display
+                git_config = self._profile_manager.get_current_git_config()
+                if git_config:
+                    current_name = git_config.get("user.name", "").strip()
+                    current_email = git_config.get("user.email", "").strip()
+                    if current_name or current_email:
+                        logger.info(
+                            f"No matching profile, showing git config: "
+                            f"{current_name} <{current_email}>"
+                        )
+                        self._detected_git_config = {
+                            "name": current_name or "(no name)",
+                            "email": current_email or "(no email)",
+                            "organization": None,
+                            "is_profile": False,
+                        }
+                    else:
+                        logger.debug("No git user configured")
+                        self._detected_git_config = None
+                else:
+                    logger.debug("Could not read git configuration")
+                    self._detected_git_config = None
+        except Exception as e:
+            logger.warning(f"Failed to detect current profile at startup: {e}")
+            self._detected_git_config = None
+
     def _setup_main_window(self) -> None:
         """Build the main application window layout."""
         logger.debug("Creating main window")
         create_main_window(self._container)
+
+        # Update header with detected git config
+        if hasattr(self, "_detected_git_config") and self._detected_git_config:
+            from src.ui.main_window import update_active_profile
+
+            config = self._detected_git_config
+            update_active_profile(
+                name=config["name"],
+                email=config["email"],
+                organization=config.get("organization"),
+                is_ready=True,
+            )
 
     def _setup_session_callbacks(self) -> None:
         """Register callbacks for session events."""
@@ -190,14 +251,109 @@ class GitSwitchApp:
         if self._tray_icon is not None:
             self._tray_icon.update_menu()
 
+    def _show_auth_dialog(self) -> None:
+        """Show authentication dialog on startup.
+
+        Checks if master password exists and shows appropriate dialog:
+        - First-time: Create master password dialog
+        - Subsequent: Unlock dialog
+        """
+        is_first_time = not self._session.has_master_password()
+        logger.debug(f"Showing auth dialog (first_time={is_first_time})")
+
+        show_password_dialog(
+            is_first_time=is_first_time,
+            on_submit=self._on_auth_submit,
+            on_cancel=self._on_auth_cancel,
+        )
+
+    def _on_auth_submit(self, password: str) -> None:
+        """Handle successful password submission.
+
+        Args:
+            password: The password entered by user.
+        """
+        try:
+            if not self._session.has_master_password():
+                # First-time setup
+                self._session.setup_master_password(password)
+                logger.info("Master password created successfully")
+            elif not self._session.unlock(password):
+                # Unlock existing session - failed
+                logger.warning("Invalid password entered")
+                self._show_auth_error("Invalid password. Please try again.")
+                return
+
+            # Authentication successful - detect current profile from git config
+            self._detect_and_display_current_profile()
+
+            # Create main window
+            self._auth_complete = True
+            self._setup_main_window()
+
+            # Update tray menu
+            if self._tray_icon is not None:
+                self._tray_icon.update_menu()
+
+            logger.info("Session unlocked successfully")
+
+        except Exception as e:
+            logger.exception("Authentication failed")
+            self._show_auth_error(f"Authentication failed: {e}")
+
+    def _on_auth_cancel(self) -> None:
+        """Handle auth dialog cancellation."""
+        if not self._auth_complete:
+            # User cancelled without authenticating - exit app
+            logger.info("Authentication cancelled, exiting")
+            self._request_exit()
+
+    def _show_auth_error(self, message: str) -> None:
+        """Show authentication error and re-prompt.
+
+        Args:
+            message: Error message to display.
+        """
+        logger.warning(f"Auth error: {message}")
+        # Re-show the dialog
+        is_first_time = not self._session.has_master_password()
+        show_password_dialog(
+            is_first_time=is_first_time,
+            on_submit=self._on_auth_submit,
+            on_cancel=self._on_auth_cancel,
+        )
+
     def _show_lock_overlay(self) -> None:
         """Display the session lock overlay dialog.
 
-        Note: Full implementation in T097 (dialogs).
-        This is a placeholder that will be replaced.
+        Shows the password dialog for re-authentication after auto-lock.
         """
-        # TODO: Implement full lock dialog in T097
-        logger.debug("Lock overlay requested (placeholder)")
+        logger.debug("Session locked, showing unlock dialog")
+        show_password_dialog(
+            is_first_time=False,
+            on_submit=self._on_unlock_submit,
+            on_cancel=None,  # Don't allow cancel when locked
+        )
+
+    def _on_unlock_submit(self, password: str) -> None:
+        """Handle unlock password submission.
+
+        Args:
+            password: The password entered by user.
+        """
+        if self._session.unlock(password):
+            logger.info("Session unlocked after auto-lock")
+            # Refresh views
+            from src.ui.views.profiles_view import refresh_profiles
+
+            refresh_profiles()
+
+            if self._tray_icon is not None:
+                self._tray_icon.update_menu()
+        else:
+            logger.warning("Invalid password on unlock attempt")
+            # Re-show dialog
+            self._show_lock_overlay()
 
     def _setup_system_tray(self) -> None:
         """Initialize and start the system tray icon."""
@@ -246,6 +402,9 @@ class GitSwitchApp:
 
         # Center viewport on screen
         self._center_viewport()
+
+        # Show password dialog on startup
+        self._show_auth_dialog()
 
         # Main loop
         while dpg.is_dearpygui_running() and self._is_running:

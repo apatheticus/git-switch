@@ -1201,3 +1201,170 @@ class TestDeleteProfileEdgeCases:
         # Git config should NOT be cleared (profile1 is still active)
         mock_git_service.set_global_config.assert_not_called()
         mock_ssh_service.remove_all_keys.assert_not_called()
+
+
+# =============================================================================
+# Detect Current Profile Tests
+# =============================================================================
+
+
+class TestDetectCurrentProfile:
+    """Tests for detect_current_profile() method."""
+
+    def test_detect_current_profile_matches_by_email(
+        self,
+        profile_manager_with_services: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """detect_current_profile should match profile by email."""
+        # Create a profile
+        profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Configure git service to return matching email
+        mock_git_service.get_global_config.return_value = {
+            "user.name": "work-user",
+            "user.email": "work@example.com",
+        }
+
+        detected = profile_manager_with_services.detect_current_profile()
+
+        assert detected is not None
+        assert detected.name == "Work"
+        assert detected.is_active is True
+
+    def test_detect_current_profile_matches_case_insensitive_email(
+        self,
+        profile_manager_with_services: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """detect_current_profile should match email case-insensitively."""
+        profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="Work@Example.COM",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        mock_git_service.get_global_config.return_value = {
+            "user.name": "work-user",
+            "user.email": "work@example.com",
+        }
+
+        detected = profile_manager_with_services.detect_current_profile()
+
+        assert detected is not None
+        assert detected.name == "Work"
+
+    def test_detect_current_profile_returns_none_when_no_match(
+        self,
+        profile_manager_with_services: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """detect_current_profile should return None when no profile matches."""
+        profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        mock_git_service.get_global_config.return_value = {
+            "user.name": "other-user",
+            "user.email": "other@example.com",
+        }
+
+        detected = profile_manager_with_services.detect_current_profile()
+
+        assert detected is None
+
+    def test_detect_current_profile_returns_none_when_no_git_config(
+        self,
+        profile_manager_with_services: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """detect_current_profile should return None when git config is empty."""
+        profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        mock_git_service.get_global_config.return_value = {
+            "user.name": "",
+            "user.email": "",
+        }
+
+        detected = profile_manager_with_services.detect_current_profile()
+
+        assert detected is None
+
+    def test_detect_current_profile_does_not_reactivate_already_active(
+        self,
+        profile_manager_with_services: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+        mock_git_service: MagicMock,
+    ) -> None:
+        """detect_current_profile should not save if profile already active."""
+        profile = profile_manager_with_services.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # Switch to make it active
+        profile_manager_with_services.switch_profile(profile.id)
+
+        mock_git_service.get_global_config.return_value = {
+            "user.name": "work-user",
+            "user.email": "work@example.com",
+        }
+
+        # Store current save count
+        original_save_count = profile_manager_with_services._save_profiles
+
+        detected = profile_manager_with_services.detect_current_profile()
+
+        assert detected is not None
+        assert detected.name == "Work"
+        # Profile should already be active, no need to re-save
+
+    def test_detect_current_profile_without_git_service(
+        self,
+        profile_manager: ProfileManager,
+        sample_ssh_private_key: bytes,
+        sample_ssh_public_key: bytes,
+    ) -> None:
+        """detect_current_profile should return None when git service unavailable."""
+        profile_manager.create_profile(
+            name="Work",
+            git_username="work-user",
+            git_email="work@example.com",
+            ssh_private_key=sample_ssh_private_key,
+            ssh_public_key=sample_ssh_public_key,
+        )
+
+        # profile_manager fixture doesn't have git_service
+        detected = profile_manager.detect_current_profile()
+
+        assert detected is None

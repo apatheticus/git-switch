@@ -122,9 +122,43 @@ def refresh_profiles() -> None:
     try:
         profiles = _container.profile_manager.list_profiles()
         _display_profiles(profiles)
+
+        # Update header with active profile
+        _update_header_with_active_profile(profiles)
     except Exception:
         logger.exception("Failed to load profiles")
         _display_profiles([])
+
+
+def _update_header_with_active_profile(profiles: list[Profile]) -> None:
+    """Update the main window header with the active profile.
+
+    Args:
+        profiles: List of all profiles.
+    """
+    from src.ui.main_window import update_active_profile
+
+    # Find active profile
+    active_profile: Profile | None = None
+    for profile in profiles:
+        if profile.is_active:
+            active_profile = profile
+            break
+
+    if active_profile:
+        update_active_profile(
+            name=active_profile.name,
+            email=active_profile.git_email,
+            organization=active_profile.organization,
+            is_ready=True,
+        )
+    else:
+        update_active_profile(
+            name=None,
+            email=None,
+            organization=None,
+            is_ready=True,
+        )
 
 
 def _display_profiles(profiles: list[Profile]) -> None:
@@ -258,12 +292,14 @@ def _handle_profile_save(data: dict[str, Any]) -> None:
         return
 
     try:
-        # Extract SSH key data
-        ssh_data = data.get("ssh", {})
-        gpg_data = data.get("gpg", {})
+        # Extract SSH key data (may be None if not provided)
+        ssh_data = data.get("ssh") or {}
+        gpg_data = data.get("gpg") or {}
 
         # Read SSH private key from file
         ssh_private_key = None
+        ssh_public_key = None
+        ssh_passphrase = None
         ssh_private_path = ssh_data.get("private_key_path", "")
         if ssh_private_path:
             from pathlib import Path
@@ -272,20 +308,21 @@ def _handle_profile_save(data: dict[str, Any]) -> None:
             if key_path.is_file():
                 ssh_private_key = key_path.read_bytes()
 
-        # Get public key
-        ssh_public_key = None
-        public_key_str = ssh_data.get("public_key", "")
-        if public_key_str:
-            ssh_public_key = public_key_str.encode("utf-8")
+            # Get public key
+            public_key_str = ssh_data.get("public_key", "")
+            if public_key_str:
+                ssh_public_key = public_key_str.encode("utf-8")
+
+            ssh_passphrase = ssh_data.get("passphrase")
 
         # Create the profile
         _container.profile_manager.create_profile(
             name=data["name"],
             git_username=data["git_username"],
             git_email=data["git_email"],
-            ssh_private_key=ssh_private_key,  # type: ignore[arg-type]
-            ssh_public_key=ssh_public_key,  # type: ignore[arg-type]
-            ssh_passphrase=ssh_data.get("passphrase"),
+            ssh_private_key=ssh_private_key,
+            ssh_public_key=ssh_public_key,
+            ssh_passphrase=ssh_passphrase,
             gpg_enabled=gpg_data.get("enabled", False),
             gpg_key_id=gpg_data.get("key_id"),
         )
@@ -311,12 +348,14 @@ def _handle_profile_update(profile: Profile, data: dict[str, Any]) -> None:
         return
 
     try:
-        # Extract update data
-        ssh_data = data.get("ssh", {})
-        gpg_data = data.get("gpg", {})
+        # Extract update data (may be None if not provided)
+        ssh_data = data.get("ssh") or {}
+        gpg_data = data.get("gpg") or {}
 
         # Read SSH private key from file if path changed
         ssh_private_key = None
+        ssh_public_key = None
+        ssh_passphrase = None
         ssh_private_path = ssh_data.get("private_key_path", "")
         if ssh_private_path:
             from pathlib import Path
@@ -325,11 +364,12 @@ def _handle_profile_update(profile: Profile, data: dict[str, Any]) -> None:
             if key_path.is_file():
                 ssh_private_key = key_path.read_bytes()
 
-        # Get public key
-        ssh_public_key = None
-        public_key_str = ssh_data.get("public_key", "")
-        if public_key_str:
-            ssh_public_key = public_key_str.encode("utf-8")
+            # Get public key
+            public_key_str = ssh_data.get("public_key", "")
+            if public_key_str:
+                ssh_public_key = public_key_str.encode("utf-8")
+
+            ssh_passphrase = ssh_data.get("passphrase")
 
         # Update the profile
         _container.profile_manager.update_profile(
@@ -339,7 +379,7 @@ def _handle_profile_update(profile: Profile, data: dict[str, Any]) -> None:
             git_email=data["git_email"],
             ssh_private_key=ssh_private_key,
             ssh_public_key=ssh_public_key,
-            ssh_passphrase=ssh_data.get("passphrase"),
+            ssh_passphrase=ssh_passphrase,
             gpg_enabled=gpg_data.get("enabled", False),
             gpg_key_id=gpg_data.get("key_id"),
         )

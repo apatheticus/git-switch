@@ -244,15 +244,27 @@ class TestProfile:
                 ssh_key=valid_ssh_key,
             )
 
-    def test_missing_ssh_key_raises(self) -> None:
-        """Profile should reject missing SSH key."""
-        with pytest.raises(ValueError, match="SSH key is required"):
-            Profile(
-                name="Test",
-                git_username="Test",
-                git_email="test@test.com",
-                ssh_key=None,
-            )
+    def test_profile_without_ssh_key_is_valid(self) -> None:
+        """Profile should accept None SSH key."""
+        profile = Profile(
+            name="Test",
+            git_username="Test",
+            git_email="test@test.com",
+            ssh_key=None,
+        )
+        assert profile.ssh_key is None
+        assert profile.has_ssh_key is False
+
+    def test_profile_with_ssh_key_has_property(self, valid_ssh_key: SSHKey) -> None:
+        """Profile should report has_ssh_key correctly when key is present."""
+        profile = Profile(
+            name="Test",
+            git_username="Test",
+            git_email="test@test.com",
+            ssh_key=valid_ssh_key,
+        )
+        assert profile.ssh_key is not None
+        assert profile.has_ssh_key is True
 
     def test_valid_email_formats(self, valid_ssh_key: SSHKey) -> None:
         """Profile should accept various valid email formats."""

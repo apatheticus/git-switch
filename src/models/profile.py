@@ -107,8 +107,11 @@ class Profile:
             raise ValueError("Git email is required")
         if not self._is_valid_email(self.git_email):
             raise ValueError("Invalid email format")
-        if self.ssh_key is None:
-            raise ValueError("SSH key is required")
+
+    @property
+    def has_ssh_key(self) -> bool:
+        """Return True if profile has SSH key configured."""
+        return self.ssh_key is not None
 
     @staticmethod
     def _is_valid_email(email: str) -> bool:

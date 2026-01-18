@@ -40,7 +40,11 @@ class GitService:
         return shutil.which("git") is not None
 
     def get_global_config(self) -> dict[str, str]:
-        """Read current Git global configuration.
+        """Read current Git global configuration (base values only).
+
+        Note: This returns only the base global config values, not including
+        any [include] directives. Use get_effective_config() to get the
+        merged/effective configuration.
 
         Returns:
             Dictionary with keys: user.name, user.email, user.signingkey, commit.gpgsign
@@ -69,6 +73,44 @@ class GitService:
                 raise GitServiceError(f"Git command timed out: {e}") from e
             except Exception as e:
                 logger.warning(f"Failed to get git config {key}: {e}")
+                result[key] = ""
+
+        return result
+
+    def get_effective_config(self) -> dict[str, str]:
+        """Read the effective Git configuration (merged from all sources).
+
+        This returns the actual effective config values after processing
+        all [include] and [includeIf] directives in the gitconfig.
+
+        Returns:
+            Dictionary with keys: user.name, user.email, user.signingkey, commit.gpgsign
+
+        Raises:
+            GitServiceError: If git command fails.
+        """
+        if not self.is_git_installed():
+            raise GitServiceError("Git is not installed or not in PATH")
+
+        result: dict[str, str] = {}
+
+        for key in self.CONFIG_KEYS:
+            try:
+                # Use --get without --global to get effective/merged config
+                process = subprocess.run(
+                    ["git", "config", "--get", key],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if process.returncode == 0:
+                    result[key] = process.stdout.strip()
+                else:
+                    result[key] = ""
+            except subprocess.TimeoutExpired as e:
+                raise GitServiceError(f"Git command timed out: {e}") from e
+            except Exception as e:
+                logger.warning(f"Failed to get effective git config {key}: {e}")
                 result[key] = ""
 
         return result

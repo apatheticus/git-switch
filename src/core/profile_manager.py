@@ -482,13 +482,120 @@ class ProfileManager:
                 return profile
         return None
 
+    def detect_current_profile(self) -> Profile | None:
+        """Detect and activate the profile matching current Git configuration.
+
+        Reads the current git global config (user.name and user.email) and
+        matches it against stored profiles. If a match is found, that profile
+        is marked as active.
+
+        Returns:
+            Matched Profile if found, None otherwise.
+
+        Raises:
+            SessionExpiredError: If session is locked.
+        """
+        self._check_session()
+        self._ensure_loaded()
+
+        if not self._git_service:
+            logger.warning("Git service not available, cannot detect current profile")
+            return None
+
+        try:
+            # Get current effective git config (includes [include] directives)
+            git_config = self._git_service.get_effective_config()
+            current_name = git_config.get("user.name", "").strip()
+            current_email = git_config.get("user.email", "").strip()
+
+            if not current_name and not current_email:
+                logger.debug("No git user configured, no profile to detect")
+                return None
+
+            # Find matching profile
+            matched_profile: Profile | None = None
+            for profile in self._profiles:
+                # Match by email (primary) and optionally by name
+                if profile.git_email.lower() == current_email.lower():
+                    # Email matches - check if name also matches or is close enough
+                    if (
+                        not current_name
+                        or profile.git_username.lower() == current_name.lower()
+                    ):
+                        matched_profile = profile
+                        break
+
+            if matched_profile:
+                # Check if already marked as active
+                if not matched_profile.is_active:
+                    # Deactivate all and activate the matched profile
+                    self._deactivate_all_profiles()
+
+                    for i, p in enumerate(self._profiles):
+                        if p.id == matched_profile.id:
+                            self._profiles[i] = Profile(
+                                id=p.id,
+                                name=p.name,
+                                git_username=p.git_username,
+                                git_email=p.git_email,
+                                organization=p.organization,
+                                ssh_key=p.ssh_key,
+                                gpg_key=p.gpg_key,
+                                created_at=p.created_at,
+                                last_used=p.last_used,
+                                is_active=True,
+                            )
+                            matched_profile = self._profiles[i]
+                            break
+
+                    self._save_profiles()
+                    logger.info(
+                        f"Detected and activated profile: {matched_profile.name} "
+                        f"(matched {current_email})"
+                    )
+                else:
+                    logger.debug(
+                        f"Profile {matched_profile.name} already active, "
+                        "matches current git config"
+                    )
+
+                return matched_profile
+
+            logger.debug(
+                f"No profile matches current git config: "
+                f"name='{current_name}', email='{current_email}'"
+            )
+            return None
+
+        except Exception as e:
+            logger.warning(f"Failed to detect current profile: {e}")
+            return None
+
+    def get_current_git_config(self) -> dict[str, str] | None:
+        """Get the current effective Git configuration.
+
+        Returns the merged/effective git config, which includes values from
+        [include] and [includeIf] directives in .gitconfig.
+
+        Returns:
+            Dictionary with 'user.name' and 'user.email', or None if unavailable.
+        """
+        if not self._git_service:
+            return None
+
+        try:
+            return self._git_service.get_effective_config()
+        except Exception as e:
+            logger.warning(f"Failed to get git config: {e}")
+            return None
+
     def create_profile(
         self,
         name: str,
         git_username: str,
         git_email: str,
-        ssh_private_key: bytes,
-        ssh_public_key: bytes,
+        ssh_private_key: bytes | None = None,
+        ssh_public_key: bytes | None = None,
         ssh_passphrase: str | None = None,
         organization: str | None = None,
         gpg_enabled: bool = False,
@@ -524,12 +631,14 @@ class ProfileManager:
         # Generate profile ID
         profile_id = uuid4()
 
-        # Create SSH key object (with raw private key for now)
-        ssh_key = SSHKey(
-            private_key_encrypted=ssh_private_key,  # Will be encrypted when saved
-            public_key=ssh_public_key,
-            fingerprint="",  # TODO: Calculate fingerprint in Phase 4
-        )
+        # Create SSH key object only if provided
+        ssh_key = None
+        if ssh_private_key and ssh_public_key:
+            ssh_key = SSHKey(
+                private_key_encrypted=ssh_private_key,  # Will be encrypted when saved
+                public_key=ssh_public_key,
+                fingerprint="",  # TODO: Calculate fingerprint in Phase 4
+            )
 
         # Create GPG key object
         gpg_key = GPGKey(enabled=False)
@@ -560,8 +669,9 @@ class ProfileManager:
         except ValueError as e:
             raise ProfileValidationError(str(e)) from e
 
-        # Save SSH key to encrypted file
-        self._save_ssh_key(profile_id, ssh_key, ssh_passphrase)
+        # Save SSH key to encrypted file only if provided
+        if ssh_key is not None:
+            self._save_ssh_key(profile_id, ssh_key, ssh_passphrase)
 
         # Save GPG key if enabled
         if gpg_enabled and gpg_private_key:
