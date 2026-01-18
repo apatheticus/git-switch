@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/apatheticus/git-switch/compare/v0.1.2...v0.1.3) (2026-01-18)
+
+
+### Code Refactoring
+
+* rename application to Git-Switch ([#11](https://github.com/apatheticus/git-switch/issues/11)) ([b27c477](https://github.com/apatheticus/git-switch/commit/b27c4779dad2bd65e189870721cd26188c3e8097))
+
 ## [0.1.2](https://github.com/apatheticus/git-switch/compare/v0.1.1...v0.1.2) (2026-01-18)
 
 
