@@ -137,7 +137,7 @@ jobs:
         shell: pwsh
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Git-Switch-build-${{ github.sha }}
           path: dist/Git-Switch.exe
