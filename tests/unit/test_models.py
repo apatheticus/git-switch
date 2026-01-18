@@ -24,7 +24,6 @@ from src.models.serialization import (
 )
 from src.models.settings import MasterKeyConfig, Settings
 
-
 # =============================================================================
 # SSHKey Tests
 # =============================================================================
@@ -116,9 +115,7 @@ class TestGPGKey:
 
     def test_enabled_without_private_key_raises(self) -> None:
         """GPGKey should reject enabled state without private key."""
-        with pytest.raises(
-            ValueError, match="GPG private key required when GPG is enabled"
-        ):
+        with pytest.raises(ValueError, match="GPG private key required when GPG is enabled"):
             GPGKey(
                 enabled=True,
                 key_id="ABCD1234EFGH5678",
@@ -399,9 +396,7 @@ class TestSettings:
 
     def test_excessive_timeout_raises(self) -> None:
         """Settings should reject timeout exceeding 24 hours."""
-        with pytest.raises(
-            ValueError, match="Auto-lock timeout cannot exceed 24 hours"
-        ):
+        with pytest.raises(ValueError, match="Auto-lock timeout cannot exceed 24 hours"):
             Settings(auto_lock_timeout=1441)
 
     def test_max_timeout_allowed(self) -> None:

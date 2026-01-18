@@ -9,19 +9,18 @@
 
 1. [Project Overview](#project-overview)
 2. [Spec-Driven Development Workflow](#spec-driven-development-workflow)
-3. [Project Constitution](#project-constitution)
-4. [Technology Stack (Non-Negotiable)](#technology-stack-non-negotiable)
-5. [Architectural Constraints](#architectural-constraints)
-6. [Project Directory Structure](#project-directory-structure)
-7. [Documentation Standards](#documentation-standards)
-8. [Coding Standards & Conventions](#coding-standards--conventions)
-9. [Security Requirements](#security-requirements)
-10. [Testing Requirements](#testing-requirements)
-11. [Build & Distribution Requirements](#build--distribution-requirements)
-12. [Git Workflow](#git-workflow)
-13. [Agent Behavioral Guidelines](#agent-behavioral-guidelines)
-14. [Prohibited Actions](#prohibited-actions)
-15. [Quality Gates](#quality-gates)
+3. [Technology Stack (Non-Negotiable)](#technology-stack-non-negotiable)
+4. [Architectural Constraints](#architectural-constraints)
+5. [Project Directory Structure](#project-directory-structure)
+6. [Documentation Standards](#documentation-standards)
+7. [Coding Standards & Conventions](#coding-standards--conventions)
+8. [Security Requirements](#security-requirements)
+9. [Testing Requirements](#testing-requirements)
+10. [Build & Distribution Requirements](#build--distribution-requirements)
+11. [Git Workflow](#git-workflow)
+12. [Agent Behavioral Guidelines](#agent-behavioral-guidelines)
+13. [Prohibited Actions](#prohibited-actions)
+14. [Quality Gates](#quality-gates)
 
 ---
 
@@ -93,82 +92,6 @@ flowchart LR
 3. **Specifications are the source of truth** — Code must implement specs, not the other way around
 4. **Tasks must be atomic** — Each task should be completable in a single commit
 5. **Human approval required** — Wait for explicit approval before advancing phases
-
----
-
-## Project Constitution
-
-The following principles are **NON-NEGOTIABLE** and supersede all other guidance. Every implementation decision MUST comply with these articles.
-
-### Article I: Security First
-
-```
-All sensitive data (SSH keys, GPG keys, passphrases, credentials) MUST be encrypted 
-at rest using AES-256-GCM with PBKDF2-derived keys. No plaintext storage of secrets 
-is permitted under any circumstances. Memory containing decrypted secrets MUST be 
-cleared immediately after use.
-```
-
-### Article II: Single Responsibility Architecture
-
-```
-Every module MUST have a single, well-defined responsibility:
-- UI components handle ONLY presentation and user interaction
-- Services handle ONLY business logic for their domain
-- Models handle ONLY data structure definitions
-- No module shall mix concerns or bypass architectural layers
-```
-
-### Article III: Windows-Native Integration
-
-```
-All system integrations MUST use Windows-native APIs and services:
-- SSH Agent: Windows OpenSSH ssh-agent service (NOT third-party agents)
-- Credential Storage: Windows Credential Manager via keyring library
-- Notifications: Windows Toast Notifications via win32 APIs
-- Startup: Windows Registry for auto-start functionality
-```
-
-### Article IV: Portable Execution
-
-```
-The final artifact MUST be a single portable .exe file:
-- No installation required
-- No admin privileges required for normal operation
-- User data stored in %APPDATA%/GitProfileSwitcher
-- All dependencies bundled via PyInstaller
-```
-
-### Article V: Graceful Degradation
-
-```
-The application MUST handle missing external dependencies gracefully:
-- If Git is not installed: Show clear error, do not crash
-- If SSH Agent is not running: Offer to start it or show instructions
-- If GPG is not installed: Disable GPG features, not entire app
-- All errors MUST be user-friendly, never raw stack traces
-```
-
-### Article VI: Test-Driven Development
-
-```
-All business logic MUST be covered by tests:
-- Unit tests for all service methods
-- Integration tests for external system interactions (mocked)
-- No feature is complete without corresponding test coverage
-- Tests MUST be written BEFORE implementation when possible
-```
-
-### Article VII: Commit Discipline
-
-```
-Every completed task requires its own commit with structured message:
-- Format: <type>(<scope>): <description>
-- Types: feat, fix, refactor, test, docs, style, chore
-- Scope: module or feature area
-- Description: imperative mood, lowercase, no period
-- Example: feat(profile-manager): add profile validation service
-```
 
 ---
 
@@ -699,6 +622,8 @@ feat(crypto): implement AES-256-GCM encryption
 Refs: #12
 ```
 
+**Important:** Do NOT include `Co-Authored-By` or similar attribution for AI assistants (Claude, Copilot, etc.) in commit messages. All commits represent human-authored work.
+
 ### Pull Request Requirements
 
 1. All tests pass
@@ -706,6 +631,7 @@ Refs: #12
 3. Documentation updated if applicable
 4. At least one approval required
 5. Commit history clean (squash if needed)
+6. No AI attribution (Co-Authored-By, etc.) in commits or PR descriptions
 
 ---
 

@@ -11,16 +11,11 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
 
 from src.core.crypto import CryptoService, secure_zero
 from src.models.exceptions import EncryptionError
-
-if TYPE_CHECKING:
-    pass
-
 
 # =============================================================================
 # Fixtures
@@ -145,9 +140,7 @@ class TestCiphertextIndependence:
         # All ciphertexts should be unique
         assert len(set(ciphertexts)) == 10
 
-    def test_similar_plaintexts_unrelated_ciphertexts(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_similar_plaintexts_unrelated_ciphertexts(self, crypto_service: CryptoService) -> None:
         """Similar plaintexts should produce unrelated ciphertexts."""
         salt = crypto_service.generate_salt()
         key = crypto_service.derive_key("password", salt)
@@ -160,9 +153,7 @@ class TestCiphertextIndependence:
 
         # Ciphertexts should be completely different (not just last byte)
         # Check that they differ by more than just a few bytes
-        differences = sum(
-            1 for a, b in zip(ciphertext1, ciphertext2, strict=False) if a != b
-        )
+        differences = sum(1 for a, b in zip(ciphertext1, ciphertext2, strict=False) if a != b)
         # Most bytes should differ due to different nonces
         assert differences > len(ciphertext1) // 2
 
@@ -219,9 +210,7 @@ class TestSecureFileDeletion:
 class TestKeyMaterialHandling:
     """Tests for proper handling of key material."""
 
-    def test_key_has_sufficient_entropy(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_key_has_sufficient_entropy(self, crypto_service: CryptoService) -> None:
         """Derived keys should have sufficient randomness."""
         salt = crypto_service.generate_salt()
         key = crypto_service.derive_key("password123", salt)
@@ -231,9 +220,7 @@ class TestKeyMaterialHandling:
         # A 32-byte key with good entropy should have many unique bytes
         assert unique_bytes > 20
 
-    def test_salt_has_sufficient_entropy(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_salt_has_sufficient_entropy(self, crypto_service: CryptoService) -> None:
         """Generated salts should have high entropy."""
         salt = crypto_service.generate_salt()
 
@@ -242,9 +229,7 @@ class TestKeyMaterialHandling:
         # A 32-byte random salt should have many unique bytes
         assert unique_bytes > 20
 
-    def test_nonce_uniqueness_in_ciphertext(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_nonce_uniqueness_in_ciphertext(self, crypto_service: CryptoService) -> None:
         """Each encryption should use a unique nonce."""
         salt = crypto_service.generate_salt()
         key = crypto_service.derive_key("password", salt)
@@ -267,16 +252,12 @@ class TestKeyMaterialHandling:
 class TestInputValidation:
     """Tests for proper input validation."""
 
-    def test_encrypt_validates_key_length(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_encrypt_validates_key_length(self, crypto_service: CryptoService) -> None:
         """encrypt should require 32-byte key."""
         with pytest.raises((ValueError, EncryptionError)):
             crypto_service.encrypt(b"test", b"short_key")
 
-    def test_decrypt_validates_key_length(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_decrypt_validates_key_length(self, crypto_service: CryptoService) -> None:
         """decrypt should require 32-byte key."""
         # Create valid ciphertext first
         salt = crypto_service.generate_salt()
@@ -287,9 +268,7 @@ class TestInputValidation:
         with pytest.raises((ValueError, EncryptionError)):
             crypto_service.decrypt(ciphertext, b"short_key")
 
-    def test_derive_key_validates_salt_length(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_derive_key_validates_salt_length(self, crypto_service: CryptoService) -> None:
         """derive_key should work with proper 32-byte salt."""
         # Should work with 32-byte salt
         key = crypto_service.derive_key("password", b"0" * 32)
@@ -304,9 +283,7 @@ class TestInputValidation:
 class TestTimingResistance:
     """Tests for timing attack resistance."""
 
-    def test_verify_password_constant_time(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_verify_password_constant_time(self, crypto_service: CryptoService) -> None:
         """verify_password should use constant-time comparison."""
         salt = crypto_service.generate_salt()
         key = crypto_service.derive_key("correct_password", salt)

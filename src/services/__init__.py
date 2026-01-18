@@ -9,18 +9,27 @@ from src.services.container import (
     create_container,
     create_test_container,
 )
+from src.services.credential_service import CredentialService
+from src.services.git_service import GitService
+from src.services.gpg_service import GPGService
 from src.services.protocols import (
     CredentialServiceProtocol,
     GitServiceProtocol,
     GPGServiceProtocol,
     SSHServiceProtocol,
 )
+from src.services.ssh_service import SSHService
 
 __all__ = [
-    "CredentialServiceProtocol",
-    "GPGServiceProtocol",
+    # Service Implementations
+    "CredentialService",
     # Protocols
+    "CredentialServiceProtocol",
+    "GPGService",
+    "GPGServiceProtocol",
+    "GitService",
     "GitServiceProtocol",
+    "SSHService",
     "SSHServiceProtocol",
     # Container
     "ServiceContainer",

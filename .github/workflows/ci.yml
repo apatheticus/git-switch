@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run ruff
+        run: ruff check .
+
+      - name: Run mypy
+        run: mypy src/
+
+      - name: Check black formatting
+        run: black --check .
+
+      - name: Check isort ordering
+        run: isort --check-only .
+
+  test:
+    name: Test (${{ matrix.test-type }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [unit, integration]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run ${{ matrix.test-type }} tests
+        run: |
+          if ("${{ matrix.test-type }}" -eq "unit") {
+            pytest -m ${{ matrix.test-type }} --cov=src --cov-report=xml --cov-report=term-missing
+          } else {
+            # Integration tests don't need to meet coverage threshold
+            pytest -m ${{ matrix.test-type }} --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=0
+          }
+        shell: pwsh
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: ${{ matrix.test-type }}
+          fail_ci_if_error: false
+
+  build-verify:
+    name: Build Verification
+    runs-on: windows-latest
+    needs: [lint, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Build executable
+        run: pyinstaller build.spec
+
+      - name: Verify executable exists
+        run: |
+          if (Test-Path "dist/GitProfileSwitcher.exe") {
+            Write-Host "Build successful: dist/GitProfileSwitcher.exe exists"
+            Get-Item "dist/GitProfileSwitcher.exe" | Select-Object Name, Length, LastWriteTime
+          } else {
+            Write-Error "Build failed: executable not found"
+            exit 1
+          }
+        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GitProfileSwitcher-build-${{ github.sha }}
+          path: dist/GitProfileSwitcher.exe
+          retention-days: 7

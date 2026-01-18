@@ -15,7 +15,6 @@ class GitSwitchError(Exception):
     """
 
 
-
 # =============================================================================
 # Authentication Errors
 # =============================================================================
@@ -29,7 +28,6 @@ class AuthenticationError(GitSwitchError):
     """
 
 
-
 class InvalidPasswordError(AuthenticationError):
     """Incorrect master password.
 
@@ -38,14 +36,12 @@ class InvalidPasswordError(AuthenticationError):
     """
 
 
-
 class SessionExpiredError(AuthenticationError):
     """Session has timed out.
 
     Raised when attempting to access protected resources
     after the session auto-lock timeout has elapsed.
     """
-
 
 
 # =============================================================================
@@ -61,7 +57,6 @@ class EncryptionError(GitSwitchError):
     """
 
 
-
 # =============================================================================
 # Profile Errors
 # =============================================================================
@@ -74,7 +69,6 @@ class ProfileError(GitSwitchError):
     """
 
 
-
 class ProfileNotFoundError(ProfileError):
     """Profile does not exist.
 
@@ -83,14 +77,12 @@ class ProfileNotFoundError(ProfileError):
     """
 
 
-
 class ProfileValidationError(ProfileError):
     """Profile data validation failed.
 
     Raised when profile data does not meet validation requirements
     such as missing required fields or invalid email format.
     """
-
 
 
 # =============================================================================
@@ -106,14 +98,12 @@ class ServiceError(GitSwitchError):
     """
 
 
-
 class GitServiceError(ServiceError):
     """Git configuration errors.
 
     Raised when git commands fail or git configuration
     cannot be read or written.
     """
-
 
 
 class SSHServiceError(ServiceError):
@@ -124,7 +114,6 @@ class SSHServiceError(ServiceError):
     """
 
 
-
 class GPGServiceError(ServiceError):
     """GPG keyring errors.
 
@@ -133,14 +122,12 @@ class GPGServiceError(ServiceError):
     """
 
 
-
 class CredentialServiceError(ServiceError):
     """Windows Credential Manager errors.
 
     Raised when Windows Credential Manager operations fail,
     including credential enumeration and deletion.
     """
-
 
 
 # =============================================================================
@@ -155,7 +142,6 @@ class RepositoryError(GitSwitchError):
     """
 
 
-
 class InvalidRepositoryError(RepositoryError):
     """Path is not a valid Git repository.
 
@@ -164,8 +150,38 @@ class InvalidRepositoryError(RepositoryError):
     """
 
 
+# =============================================================================
+# Import/Export Errors
+# =============================================================================
+
+
+class ImportExportError(GitSwitchError):
+    """Base exception for import/export operations.
+
+    Base class for all failures related to profile import
+    and export functionality.
+    """
+
+
+class InvalidArchiveError(ImportExportError):
+    """Archive file is invalid or corrupted.
+
+    Raised when an archive file has an invalid magic number,
+    unsupported version, or corrupted data structure.
+    """
+
+
+class ArchivePasswordError(ImportExportError):
+    """Archive password is incorrect.
+
+    Raised when the provided password cannot decrypt
+    the archive contents.
+    """
+
 
 __all__ = [
+    # Import/Export
+    "ArchivePasswordError",
     # Authentication
     "AuthenticationError",
     "CredentialServiceError",
@@ -175,6 +191,9 @@ __all__ = [
     "GitServiceError",
     # Base
     "GitSwitchError",
+    # Import/Export
+    "ImportExportError",
+    "InvalidArchiveError",
     "InvalidPasswordError",
     "InvalidRepositoryError",
     # Profile

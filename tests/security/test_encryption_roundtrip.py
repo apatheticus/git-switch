@@ -11,16 +11,11 @@ and should FAIL until the implementation is complete.
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
 
 import pytest
 
 from src.core.crypto import CryptoService
 from src.models.exceptions import EncryptionError
-
-if TYPE_CHECKING:
-    pass
-
 
 # =============================================================================
 # Fixtures
@@ -108,9 +103,7 @@ class TestKeyDerivation:
 class TestSaltGeneration:
     """Tests for cryptographic salt generation."""
 
-    def test_generate_salt_returns_32_bytes(
-        self, crypto_service: CryptoService
-    ) -> None:
+    def test_generate_salt_returns_32_bytes(self, crypto_service: CryptoService) -> None:
         """generate_salt should return 32 bytes."""
         salt = crypto_service.generate_salt()
         assert len(salt) == 32
@@ -295,7 +288,7 @@ class TestEncryptionRoundtrip:
     ) -> None:
         """Roundtrip should handle UTF-8 encoded content."""
         key = crypto_service.derive_key(test_password, test_salt)
-        plaintext = "Hello, 世界! 🔐".encode("utf-8")
+        plaintext = "Hello, 世界! 🔐".encode()
         ciphertext = crypto_service.encrypt(plaintext, key)
         decrypted = crypto_service.decrypt(ciphertext, key)
         assert decrypted == plaintext
