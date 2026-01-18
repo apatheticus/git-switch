@@ -12,11 +12,16 @@ import hashlib
 import io
 import logging
 import os
+import re
 import subprocess
 import tempfile
 from typing import TYPE_CHECKING
 
 from src.models.exceptions import SSHServiceError
+
+# Valid hostname pattern: alphanumeric, dots, hyphens, must start/end with alphanumeric
+# Prevents command injection via malicious hostnames
+_HOST_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$")
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -266,7 +271,14 @@ class SSHService:
         Returns:
             Tuple of (success: bool, message: str).
             Message contains username on success or error details on failure.
+
+        Note:
+            Host parameter is validated to prevent command injection.
         """
+        # Validate host to prevent command injection
+        if not _HOST_PATTERN.match(host):
+            return False, f"Invalid hostname format: {host}"
+
         try:
             process = subprocess.run(
                 ["ssh", "-T", f"git@{host}", "-o", "StrictHostKeyChecking=no"],

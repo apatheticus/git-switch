@@ -322,14 +322,14 @@
 
 ### E2E Validation
 
-- [ ] T115 Create e2e test for full profile switch workflow in tests/e2e/test_profile_switch_workflow.py
-- [ ] T116 Run quickstart.md validation (all steps work as documented)
+- [x] T115 Create e2e test for full profile switch workflow in tests/e2e/test_profile_switch_workflow.py
+- [x] T116 Run quickstart.md validation (all steps work as documented)
 
 ### Security Hardening
 
-- [ ] T117 Review all subprocess calls for command injection vulnerabilities
-- [ ] T118 Verify no plaintext secrets in logs (run security test suite)
-- [ ] T119 Verify master password never stored (only verification hash)
+- [x] T117 Review all subprocess calls for command injection vulnerabilities
+- [x] T118 Verify no plaintext secrets in logs (run security test suite)
+- [x] T119 Verify master password never stored (only verification hash)
 
 ---
 
