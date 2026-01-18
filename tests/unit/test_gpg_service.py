@@ -282,17 +282,21 @@ class TestValidateKey:
         if gpg_service._gpg is None:
             pytest.skip("GPG not available")
 
-        with patch.object(gpg_service, "_gpg") as mock_gpg:
-            mock_result = MagicMock()
-            mock_result.ok = True
-            mock_result.fingerprints = ["0123456789ABCDEF0123456789ABCDEF01234567"]
-            mock_gpg.import_keys.return_value = mock_result
+        # Mock the gnupg.GPG class to avoid actual GPG operations
+        # The validate_key method creates a new GPG instance in a temp dir
+        mock_result = MagicMock()
+        mock_result.ok = True
+        mock_result.fingerprints = ["0123456789ABCDEF0123456789ABCDEF01234567"]
 
+        mock_gpg_instance = MagicMock()
+        mock_gpg_instance.import_keys.return_value = mock_result
+
+        with patch("gnupg.GPG", return_value=mock_gpg_instance):
             valid, key_id, error = gpg_service.validate_key(sample_gpg_private_key)
 
-            assert valid is True
-            assert key_id != ""
-            assert error == ""
+        assert valid is True
+        assert key_id == "89ABCDEF01234567"  # Last 16 chars of fingerprint
+        assert error == ""
 
     def test_validate_key_rejects_invalid_key(self, gpg_service: GPGService) -> None:
         """validate_key should reject invalid GPG key data."""
@@ -300,17 +304,20 @@ class TestValidateKey:
         if gpg_service._gpg is None:
             pytest.skip("GPG not available")
 
-        with patch.object(gpg_service, "_gpg") as mock_gpg:
-            mock_result = MagicMock()
-            mock_result.ok = False
-            mock_result.fingerprints = []
-            mock_gpg.import_keys.return_value = mock_result
+        # Mock the gnupg.GPG class to simulate import failure
+        mock_result = MagicMock()
+        mock_result.ok = False
+        mock_result.fingerprints = []
 
+        mock_gpg_instance = MagicMock()
+        mock_gpg_instance.import_keys.return_value = mock_result
+
+        with patch("gnupg.GPG", return_value=mock_gpg_instance):
             valid, key_id, error = gpg_service.validate_key(b"invalid key data")
 
-            assert valid is False
-            assert key_id == ""
-            assert error != ""
+        assert valid is False
+        assert key_id == ""
+        assert error != ""
 
     def test_validate_key_returns_error_when_gpg_unavailable(
         self,

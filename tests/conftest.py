@@ -24,9 +24,12 @@ def temp_dir() -> Generator[Path, None, None]:
 
     Yields:
         Path to a temporary directory that is cleaned up after the test.
+        Path is resolved to handle Windows short path names (8.3 format).
     """
     with tempfile.TemporaryDirectory() as tmpdir:
-        yield Path(tmpdir)
+        # Resolve the path to convert Windows short names (e.g., RUNNER~1)
+        # to full names (e.g., runneradmin) for consistent path comparison
+        yield Path(tmpdir).resolve()
 
 
 @pytest.fixture

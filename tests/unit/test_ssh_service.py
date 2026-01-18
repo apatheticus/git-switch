@@ -306,11 +306,17 @@ QyNTUxOQAAACBtest1234567890abcdefghijklmnopqrstuvwxyzAAAAHHRlc3RAZXhh
 bXBsZS5jb20BAgMEBQ==
 -----END OPENSSH PRIVATE KEY-----
 """
-        # The basic validation checks for PEM format markers
-        # which works without paramiko installed
-        valid, error = ssh_service.validate_private_key(valid_key)
+        # Mock paramiko to avoid actual cryptographic validation
+        # which would fail with our test key data
+        mock_paramiko = MagicMock()
+        mock_paramiko.Ed25519Key.from_private_key.return_value = MagicMock()
+        mock_paramiko.RSAKey = MagicMock()
+        mock_paramiko.ECDSAKey = MagicMock()
 
-        # Should be valid based on format (has BEGIN/END markers)
+        with patch.dict("sys.modules", {"paramiko": mock_paramiko}):
+            valid, error = ssh_service.validate_private_key(valid_key)
+
+        # Should be valid when paramiko successfully parses the key
         assert valid is True
         assert error == ""
 
@@ -330,10 +336,15 @@ bXBsZS5jb20BAgMEBQ==
 b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABB
 -----END OPENSSH PRIVATE KEY-----
 """
-        # Basic validation checks format, not actual passphrase correctness
-        # when paramiko is not available
-        valid, error = ssh_service.validate_private_key(
-            encrypted_key, passphrase="correct_passphrase"
-        )
+        # Mock paramiko to avoid actual cryptographic validation
+        mock_paramiko = MagicMock()
+        mock_paramiko.Ed25519Key.from_private_key.return_value = MagicMock()
+        mock_paramiko.RSAKey = MagicMock()
+        mock_paramiko.ECDSAKey = MagicMock()
+
+        with patch.dict("sys.modules", {"paramiko": mock_paramiko}):
+            valid, error = ssh_service.validate_private_key(
+                encrypted_key, passphrase="correct_passphrase"
+            )
 
         assert valid is True
