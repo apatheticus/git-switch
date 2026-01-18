@@ -254,8 +254,7 @@ class GPGService:
                     fingerprint = result.fingerprints[0]
                     key_id = fingerprint[-16:]
                     return True, key_id, ""
-                else:
-                    return False, "", "Invalid key format or corrupted key"
+                return False, "", "Invalid key format or corrupted key"
 
         except Exception as e:
             return False, "", str(e)

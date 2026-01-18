@@ -8,13 +8,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from typing import TYPE_CHECKING
 
 from src.models.settings import Settings
 from src.utils.paths import get_config_path
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class SettingsManager:
@@ -105,6 +101,7 @@ class SettingsManager:
         """
         if self._settings is None:
             self.load_settings()
+            assert self._settings is not None  # load_settings ensures this
 
         if not hasattr(self._settings, key):
             raise ValueError(f"Invalid setting key: {key}")

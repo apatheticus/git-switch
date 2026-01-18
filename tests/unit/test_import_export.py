@@ -12,11 +12,10 @@ and should FAIL until the implementation is complete.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
-from uuid import UUID, uuid4
+from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -54,9 +53,7 @@ def mock_crypto_service() -> MagicMock:
     mock.generate_salt.return_value = b"S" * 32
     mock.derive_key.return_value = b"K" * 32
     mock.encrypt.side_effect = lambda data, key: b"ENC:" + data
-    mock.decrypt.side_effect = (
-        lambda data, key: data[4:] if data.startswith(b"ENC:") else data
-    )
+    mock.decrypt.side_effect = lambda data, key: data[4:] if data.startswith(b"ENC:") else data
     return mock
 
 
@@ -150,17 +147,16 @@ def import_export_service(
     mock_profile_manager: MagicMock,
     mock_repository_manager: MagicMock,
     temp_dir: Path,
-) -> "ImportExportService":
+) -> ImportExportService:
     """Create an ImportExportService for testing."""
     from src.core.import_export import ImportExportService
 
-    service = ImportExportService(
+    return ImportExportService(
         session_manager=mock_session_manager,
         crypto_service=mock_crypto_service,
         profile_manager=mock_profile_manager,
         repository_manager=mock_repository_manager,
     )
-    return service
 
 
 @pytest.fixture
@@ -170,17 +166,16 @@ def import_export_service_locked(
     mock_profile_manager: MagicMock,
     mock_repository_manager: MagicMock,
     temp_dir: Path,
-) -> "ImportExportService":
+) -> ImportExportService:
     """Create an ImportExportService with locked session."""
     from src.core.import_export import ImportExportService
 
-    service = ImportExportService(
+    return ImportExportService(
         session_manager=mock_session_manager_locked,
         crypto_service=mock_crypto_service,
         profile_manager=mock_profile_manager,
         repository_manager=mock_repository_manager,
     )
-    return service
 
 
 @pytest.fixture
@@ -191,7 +186,7 @@ def sample_archive_password() -> str:
 
 @pytest.fixture
 def sample_archive(
-    import_export_service: "ImportExportService",
+    import_export_service: ImportExportService,
     temp_dir: Path,
     sample_archive_password: str,
 ) -> Path:
@@ -247,7 +242,7 @@ class TestExportProfiles:
 
     def test_export_profiles_creates_encrypted_archive(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -265,7 +260,7 @@ class TestExportProfiles:
 
     def test_export_profiles_includes_ssh_keys(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_crypto_service: MagicMock,
@@ -283,7 +278,7 @@ class TestExportProfiles:
 
     def test_export_profiles_includes_gpg_keys(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -304,7 +299,7 @@ class TestExportProfiles:
 
     def test_export_profiles_includes_repository_assignments(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -322,7 +317,7 @@ class TestExportProfiles:
 
     def test_export_profiles_uses_separate_archive_password(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_crypto_service: MagicMock,
@@ -340,7 +335,7 @@ class TestExportProfiles:
 
     def test_export_profiles_requires_unlocked_session(
         self,
-        import_export_service_locked: "ImportExportService",
+        import_export_service_locked: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -388,7 +383,7 @@ class TestExportProfiles:
 
     def test_export_profiles_specific_profiles_only(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         mock_profile_manager: MagicMock,
         temp_dir: Path,
         sample_archive_password: str,
@@ -417,7 +412,7 @@ class TestImportProfiles:
 
     def test_import_profiles_decrypts_archive(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -436,13 +431,13 @@ class TestImportProfiles:
 
     def test_import_profiles_replace_mode_clears_existing(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
     ) -> None:
         """import_profiles with replace mode should clear all existing profiles."""
-        result = import_export_service.import_profiles(
+        import_export_service.import_profiles(
             file_path=sample_archive,
             archive_password=sample_archive_password,
             mode="replace",
@@ -453,7 +448,7 @@ class TestImportProfiles:
 
     def test_import_profiles_merge_mode_adds_to_existing(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -471,7 +466,7 @@ class TestImportProfiles:
 
     def test_import_profiles_requires_unlocked_session(
         self,
-        import_export_service_locked: "ImportExportService",
+        import_export_service_locked: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -527,7 +522,7 @@ class TestConflictResolution:
 
     def test_import_merge_renames_on_conflict(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -547,7 +542,7 @@ class TestConflictResolution:
 
     def test_import_merge_skips_on_conflict(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -565,7 +560,7 @@ class TestConflictResolution:
 
     def test_import_merge_overwrites_on_conflict(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -593,7 +588,7 @@ class TestArchiveFormat:
 
     def test_archive_has_correct_magic_number(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -615,7 +610,7 @@ class TestArchiveFormat:
 
     def test_archive_invalid_magic_raises_error(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -634,7 +629,7 @@ class TestArchiveFormat:
 
     def test_archive_version_mismatch_handled(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -657,7 +652,7 @@ class TestArchiveFormat:
 
     def test_archive_too_short_raises_error(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -693,7 +688,7 @@ class TestArchiveFormat:
         # Corrupt the archive by modifying bytes in the encrypted section
         data = real_crypto_archive.read_bytes()
         # Corrupt bytes after header (magic + version + salt = 4 + 4 + 32 = 40)
-        corrupted_data = data[:50] + b"\xFF" * 20 + data[70:]
+        corrupted_data = data[:50] + b"\xff" * 20 + data[70:]
         corrupted_archive = real_crypto_archive.parent / "corrupted.gps"
         corrupted_archive.write_bytes(corrupted_data)
 
@@ -721,7 +716,7 @@ class TestExportResult:
 
     def test_export_result_contains_file_path(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -737,7 +732,7 @@ class TestExportResult:
 
     def test_export_result_contains_profile_count(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -753,7 +748,7 @@ class TestExportResult:
 
     def test_export_result_contains_file_size(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -774,7 +769,7 @@ class TestImportResult:
 
     def test_import_result_contains_imported_profiles(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -792,7 +787,7 @@ class TestImportResult:
 
     def test_import_result_contains_skipped_profiles(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
     ) -> None:
@@ -808,7 +803,7 @@ class TestImportResult:
 
     def test_import_result_contains_renamed_profiles(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
     ) -> None:
@@ -824,7 +819,7 @@ class TestImportResult:
 
     def test_import_result_contains_repository_count(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         sample_archive: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,
@@ -851,7 +846,7 @@ class TestImportExportSecurity:
 
     def test_export_does_not_leak_session_key(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_session_manager: MagicMock,
@@ -873,7 +868,7 @@ class TestImportExportSecurity:
 
     def test_export_re_encrypts_keys_with_archive_key(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_crypto_service: MagicMock,
@@ -892,7 +887,7 @@ class TestImportExportSecurity:
 
     def test_import_file_not_found_raises_error(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
     ) -> None:
@@ -954,7 +949,7 @@ class TestImportExportEdgeCases:
 
     def test_export_empty_password_allowed(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
     ) -> None:
         """export_profiles should allow empty archive password (for local use)."""
@@ -970,7 +965,7 @@ class TestImportExportEdgeCases:
 
     def test_import_without_repositories(
         self,
-        import_export_service: "ImportExportService",
+        import_export_service: ImportExportService,
         temp_dir: Path,
         sample_archive_password: str,
         mock_profile_manager: MagicMock,

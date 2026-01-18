@@ -6,19 +6,12 @@ security, and e2e tests.
 
 from __future__ import annotations
 
-import os
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 
 import pytest
-
-if TYPE_CHECKING:
-    from src.models.profile import Profile
-    from src.models.repository import Repository
-    from src.models.settings import Settings
-
 
 # =============================================================================
 # Path Fixtures
@@ -264,9 +257,7 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "slow: Tests that take longer to run")
 
 
-def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
-) -> None:
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     """Automatically mark tests based on their location.
 
     Args:

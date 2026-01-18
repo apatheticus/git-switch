@@ -13,11 +13,10 @@ and should FAIL until the implementation is complete.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
@@ -113,16 +112,14 @@ def mock_crypto_service() -> MagicMock:
     """Create a mock CryptoService."""
     mock = MagicMock()
     mock.encrypt.side_effect = lambda data, key: b"ENC:" + data
-    mock.decrypt.side_effect = (
-        lambda data, key: data[4:] if data.startswith(b"ENC:") else data
-    )
+    mock.decrypt.side_effect = lambda data, key: data[4:] if data.startswith(b"ENC:") else data
     return mock
 
 
 @pytest.fixture
 def profile_manager(
     mock_session_manager: MagicMock, mock_crypto_service: MagicMock, temp_dir: Path
-) -> "ProfileManager":
+) -> ProfileManager:
     """Create a ProfileManager instance for testing."""
     from src.core.profile_manager import ProfileManager
 
@@ -145,7 +142,7 @@ def profile_manager(
 @pytest.fixture
 def profile_manager_locked(
     mock_session_manager_locked: MagicMock, mock_crypto_service: MagicMock, temp_dir: Path
-) -> "ProfileManager":
+) -> ProfileManager:
     """Create a ProfileManager with locked session."""
     from src.core.profile_manager import ProfileManager
 
@@ -190,16 +187,14 @@ def sample_ssh_public_key() -> bytes:
 class TestListProfiles:
     """Tests for list_profiles() method."""
 
-    def test_list_profiles_empty_when_no_profiles(
-        self, profile_manager: "ProfileManager"
-    ) -> None:
+    def test_list_profiles_empty_when_no_profiles(self, profile_manager: ProfileManager) -> None:
         """list_profiles should return empty list when no profiles exist."""
         profiles = profile_manager.list_profiles()
         assert profiles == []
 
     def test_list_profiles_returns_all_profiles(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -238,7 +233,7 @@ class TestGetProfile:
 
     def test_get_profile_returns_profile_when_exists(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -258,7 +253,7 @@ class TestGetProfile:
         assert profile.git_email == "work@example.com"
 
     def test_get_profile_returns_none_when_not_found(
-        self, profile_manager: "ProfileManager"
+        self, profile_manager: ProfileManager
     ) -> None:
         """get_profile should return None when profile doesn't exist."""
         random_id = uuid4()
@@ -276,7 +271,7 @@ class TestGetActiveProfile:
 
     def test_get_active_profile_returns_active(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -301,7 +296,7 @@ class TestGetActiveProfile:
 
     def test_get_active_profile_returns_none_when_no_active(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -329,7 +324,7 @@ class TestCreateProfile:
 
     def test_create_profile_with_ssh_only(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -351,13 +346,17 @@ class TestCreateProfile:
 
     def test_create_profile_with_ssh_and_gpg(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
         """create_profile should create a profile with SSH and GPG keys."""
-        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
-        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        gpg_private = (
+            b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        )
+        gpg_public = (
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        )
 
         profile = profile_manager.create_profile(
             name="Work",
@@ -376,7 +375,7 @@ class TestCreateProfile:
 
     def test_create_profile_validates_email(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -394,7 +393,7 @@ class TestCreateProfile:
 
     def test_create_profile_stores_encrypted_keys(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
@@ -413,7 +412,7 @@ class TestCreateProfile:
 
     def test_create_profile_raises_session_expired_when_locked(
         self,
-        profile_manager_locked: "ProfileManager",
+        profile_manager_locked: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -440,7 +439,7 @@ class TestUpdateProfile:
 
     def test_update_profile_updates_fields(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -465,7 +464,7 @@ class TestUpdateProfile:
 
     def test_update_profile_replaces_ssh_key(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -478,7 +477,9 @@ class TestUpdateProfile:
             ssh_public_key=sample_ssh_public_key,
         )
 
-        new_private = b"-----BEGIN OPENSSH PRIVATE KEY-----\nnewkey\n-----END OPENSSH PRIVATE KEY-----"
+        new_private = (
+            b"-----BEGIN OPENSSH PRIVATE KEY-----\nnewkey\n-----END OPENSSH PRIVATE KEY-----"
+        )
         new_public = b"ssh-ed25519 NEWKEY newuser@example.com"
 
         updated = profile_manager.update_profile(
@@ -491,9 +492,7 @@ class TestUpdateProfile:
         assert updated.ssh_key is not None
         assert updated.ssh_key.public_key == new_public
 
-    def test_update_profile_raises_not_found(
-        self, profile_manager: "ProfileManager"
-    ) -> None:
+    def test_update_profile_raises_not_found(self, profile_manager: ProfileManager) -> None:
         """update_profile should raise ProfileNotFoundError for non-existent profile."""
         from src.models.exceptions import ProfileNotFoundError
 
@@ -512,7 +511,7 @@ class TestDeleteProfile:
 
     def test_delete_profile_removes_profile(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -532,7 +531,7 @@ class TestDeleteProfile:
 
     def test_delete_profile_removes_key_files(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
@@ -551,9 +550,7 @@ class TestDeleteProfile:
         # Verify secure_delete_file was called for key cleanup
         mock_crypto_service.secure_delete_file.assert_called()
 
-    def test_delete_profile_raises_not_found(
-        self, profile_manager: "ProfileManager"
-    ) -> None:
+    def test_delete_profile_raises_not_found(self, profile_manager: ProfileManager) -> None:
         """delete_profile should raise ProfileNotFoundError for non-existent profile."""
         from src.models.exceptions import ProfileNotFoundError
 
@@ -621,7 +618,7 @@ class TestSessionLockBehavior:
     """Tests for behavior when session is locked."""
 
     def test_list_profiles_requires_unlocked_session(
-        self, profile_manager_locked: "ProfileManager"
+        self, profile_manager_locked: ProfileManager
     ) -> None:
         """list_profiles should raise SessionExpiredError when locked."""
         from src.models.exceptions import SessionExpiredError
@@ -630,7 +627,7 @@ class TestSessionLockBehavior:
             profile_manager_locked.list_profiles()
 
     def test_get_profile_requires_unlocked_session(
-        self, profile_manager_locked: "ProfileManager"
+        self, profile_manager_locked: ProfileManager
     ) -> None:
         """get_profile should raise SessionExpiredError when locked."""
         from src.models.exceptions import SessionExpiredError
@@ -639,7 +636,7 @@ class TestSessionLockBehavior:
             profile_manager_locked.get_profile(uuid4())
 
     def test_update_profile_requires_unlocked_session(
-        self, profile_manager_locked: "ProfileManager"
+        self, profile_manager_locked: ProfileManager
     ) -> None:
         """update_profile should raise SessionExpiredError when locked."""
         from src.models.exceptions import SessionExpiredError
@@ -648,7 +645,7 @@ class TestSessionLockBehavior:
             profile_manager_locked.update_profile(uuid4(), name="New Name")
 
     def test_delete_profile_requires_unlocked_session(
-        self, profile_manager_locked: "ProfileManager"
+        self, profile_manager_locked: ProfileManager
     ) -> None:
         """delete_profile should raise SessionExpiredError when locked."""
         from src.models.exceptions import SessionExpiredError
@@ -671,7 +668,7 @@ def profile_manager_with_services(
     mock_gpg_service: MagicMock,
     mock_credential_service: MagicMock,
     temp_dir: Path,
-) -> "ProfileManager":
+) -> ProfileManager:
     """Create a ProfileManager with all service mocks for switch_profile testing."""
     from src.core.profile_manager import ProfileManager
 
@@ -707,7 +704,7 @@ class TestSwitchProfile:
 
     def test_switch_profile_updates_git_config(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -725,11 +722,14 @@ class TestSwitchProfile:
 
         mock_git_service.set_global_config.assert_called_once()
         call_kwargs = mock_git_service.set_global_config.call_args
-        assert call_kwargs.kwargs.get("username") == "work-user" or call_kwargs[1].get("username") == "work-user"
+        assert (
+            call_kwargs.kwargs.get("username") == "work-user"
+            or call_kwargs[1].get("username") == "work-user"
+        )
 
     def test_switch_profile_clears_credentials(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_credential_service: MagicMock,
@@ -749,7 +749,7 @@ class TestSwitchProfile:
 
     def test_switch_profile_adds_ssh_key_to_agent(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_ssh_service: MagicMock,
@@ -770,14 +770,18 @@ class TestSwitchProfile:
 
     def test_switch_profile_imports_gpg_key_when_enabled(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_gpg_service: MagicMock,
     ) -> None:
         """switch_profile should import GPG key when GPG is enabled."""
-        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
-        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        gpg_private = (
+            b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        )
+        gpg_public = (
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        )
 
         profile = profile_manager_with_services.create_profile(
             name="Work",
@@ -797,7 +801,7 @@ class TestSwitchProfile:
 
     def test_switch_profile_deactivates_previous_active_profile(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -832,7 +836,7 @@ class TestSwitchProfile:
 
     def test_switch_profile_updates_last_used_timestamp(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -855,7 +859,7 @@ class TestSwitchProfile:
             assert updated.last_used > original_last_used
 
     def test_switch_profile_raises_profile_not_found(
-        self, profile_manager_with_services: "ProfileManager"
+        self, profile_manager_with_services: ProfileManager
     ) -> None:
         """switch_profile should raise ProfileNotFoundError for non-existent profile."""
         from src.models.exceptions import ProfileNotFoundError
@@ -865,7 +869,7 @@ class TestSwitchProfile:
             profile_manager_with_services.switch_profile(random_id)
 
     def test_switch_profile_requires_unlocked_session(
-        self, profile_manager_locked: "ProfileManager"
+        self, profile_manager_locked: ProfileManager
     ) -> None:
         """switch_profile should raise SessionExpiredError when session is locked."""
         from src.models.exceptions import SessionExpiredError
@@ -875,7 +879,7 @@ class TestSwitchProfile:
 
     def test_switch_profile_local_scope_updates_repo_config(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -896,7 +900,10 @@ class TestSwitchProfile:
 
         mock_git_service.set_local_config.assert_called_once()
         call_kwargs = mock_git_service.set_local_config.call_args
-        assert call_kwargs.kwargs.get("repo_path") == mock_git_repo or call_kwargs[1].get("repo_path") == mock_git_repo
+        assert (
+            call_kwargs.kwargs.get("repo_path") == mock_git_repo
+            or call_kwargs[1].get("repo_path") == mock_git_repo
+        )
 
 
 # =============================================================================
@@ -909,7 +916,7 @@ class TestUpdateProfileEdgeCases:
 
     def test_update_profile_with_ssh_key_deletes_old_key_file(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
@@ -926,7 +933,9 @@ class TestUpdateProfileEdgeCases:
         # Reset mock to track new calls
         mock_crypto_service.secure_delete_file.reset_mock()
 
-        new_private = b"-----BEGIN OPENSSH PRIVATE KEY-----\nnewkey\n-----END OPENSSH PRIVATE KEY-----"
+        new_private = (
+            b"-----BEGIN OPENSSH PRIVATE KEY-----\nnewkey\n-----END OPENSSH PRIVATE KEY-----"
+        )
         new_public = b"ssh-ed25519 NEWKEY newuser@example.com"
 
         profile_manager.update_profile(
@@ -940,14 +949,18 @@ class TestUpdateProfileEdgeCases:
 
     def test_update_profile_disabling_gpg_deletes_gpg_key_file(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
     ) -> None:
         """update_profile should delete GPG key file when disabling GPG."""
-        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
-        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        gpg_private = (
+            b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        )
+        gpg_public = (
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        )
 
         profile = profile_manager.create_profile(
             name="Work",
@@ -976,7 +989,7 @@ class TestUpdateProfileEdgeCases:
 
     def test_update_profile_preserves_created_at_timestamp(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -1000,7 +1013,7 @@ class TestUpdateProfileEdgeCases:
 
     def test_update_profile_preserves_last_used_timestamp(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
     ) -> None:
@@ -1026,7 +1039,7 @@ class TestUpdateProfileEdgeCases:
 
     def test_update_profile_with_passphrase_change(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
@@ -1066,7 +1079,7 @@ class TestDeleteProfileEdgeCases:
 
     def test_delete_active_profile_clears_git_config(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,
@@ -1096,7 +1109,7 @@ class TestDeleteProfileEdgeCases:
 
     def test_delete_profile_when_key_files_missing_succeeds(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
@@ -1122,14 +1135,18 @@ class TestDeleteProfileEdgeCases:
 
     def test_delete_profile_with_gpg_enabled_cleans_up_gpg_file(
         self,
-        profile_manager: "ProfileManager",
+        profile_manager: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_crypto_service: MagicMock,
     ) -> None:
         """delete_profile should clean up GPG key file when profile has GPG enabled."""
-        gpg_private = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
-        gpg_public = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        gpg_private = (
+            b"-----BEGIN PGP PRIVATE KEY BLOCK-----\ntest\n-----END PGP PRIVATE KEY BLOCK-----"
+        )
+        gpg_public = (
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ntest\n-----END PGP PUBLIC KEY BLOCK-----"
+        )
 
         profile = profile_manager.create_profile(
             name="Work",
@@ -1153,7 +1170,7 @@ class TestDeleteProfileEdgeCases:
 
     def test_delete_inactive_profile_does_not_clear_git_config(
         self,
-        profile_manager_with_services: "ProfileManager",
+        profile_manager_with_services: ProfileManager,
         sample_ssh_private_key: bytes,
         sample_ssh_public_key: bytes,
         mock_git_service: MagicMock,

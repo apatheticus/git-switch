@@ -23,7 +23,6 @@ CRED_ENUMERATE_ALL_CREDENTIALS = 1
 class SSHService:
     """Placeholder for type hint compatibility."""
 
-    pass
 
 
 class CredentialService:
@@ -140,6 +139,7 @@ class CredentialService:
         Returns:
             List of credential target names.
         """
+
         # Define credential structure
         class CREDENTIAL(ctypes.Structure):
             _fields_ = [
@@ -262,8 +262,16 @@ class CredentialService:
 
         Returns:
             True if deleted, False if not found.
+
+        Raises:
+            CredentialServiceError: If target contains invalid characters.
         """
         import subprocess
+
+        # Validate target to prevent command injection
+        # cmdkey targets should not contain shell metacharacters
+        if any(c in target for c in ("&", "|", ";", "$", "`", "\n", "\r", '"', "'")):
+            raise CredentialServiceError(f"Invalid credential target format: {target}")
 
         try:
             process = subprocess.run(

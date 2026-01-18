@@ -37,7 +37,6 @@ from src.utils.windows import (
     is_windows,
 )
 
-
 # =============================================================================
 # Path Utilities Tests
 # =============================================================================
@@ -65,59 +64,45 @@ class TestPaths:
         get_app_data_dir()
         assert app_dir.exists()
 
-    def test_get_profiles_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_profiles_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_profiles_path should return path to profiles.dat."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_profiles_path()
         assert result.name == "profiles.dat"
         assert "GitProfileSwitcher" in str(result)
 
-    def test_get_config_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_config_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_config_path should return path to config.json."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_config_path()
         assert result.name == "config.json"
 
-    def test_get_master_key_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_master_key_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_master_key_path should return path to master.json."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_master_key_path()
         assert result.name == "master.json"
 
-    def test_get_repositories_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_repositories_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_repositories_path should return path to repositories.json."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_repositories_path()
         assert result.name == "repositories.json"
 
-    def test_get_keys_dir(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_keys_dir(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_keys_dir should return path to keys directory."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_keys_dir()
         assert result.name == "keys"
         assert result.exists()
 
-    def test_get_ui_state_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_ui_state_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_ui_state_path should return path to ui_state.json."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_ui_state_path()
         assert result.name == "ui_state.json"
 
-    def test_get_ssh_key_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_ssh_key_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_ssh_key_path should return path based on profile ID."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         profile_id = "12345678-1234-5678-1234-567812345678"
@@ -125,9 +110,7 @@ class TestPaths:
         assert result.name == f"{profile_id}.ssh"
         assert "keys" in str(result)
 
-    def test_get_gpg_key_path(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_get_gpg_key_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_gpg_key_path should return path based on profile ID."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         profile_id = "12345678-1234-5678-1234-567812345678"
@@ -207,6 +190,7 @@ class TestNotifications:
         with patch.dict("sys.modules", {"win10toast": mock_win10toast}):
             # Need to reimport after patching
             import importlib
+
             from src.utils import notifications
 
             importlib.reload(notifications)
@@ -218,21 +202,18 @@ class TestNotifications:
     def test_show_notification_without_win10toast(self) -> None:
         """show_notification should return False if win10toast not installed."""
         # Mock the import to raise ImportError
-        with patch.dict("sys.modules", {"win10toast": None}):
-            with patch(
-                "builtins.__import__",
-                side_effect=ImportError("No module named 'win10toast'"),
-            ):
-                # The function should handle ImportError gracefully
-                result = show_notification("Test", "Message")
-                assert result is False
+        with patch.dict("sys.modules", {"win10toast": None}), patch(
+            "builtins.__import__",
+            side_effect=ImportError("No module named 'win10toast'"),
+        ):
+            # The function should handle ImportError gracefully
+            result = show_notification("Test", "Message")
+            assert result is False
 
     def test_show_profile_switch_notification_with_org(self) -> None:
         """show_profile_switch_notification should format message with org."""
         # Mock the underlying show_notification
-        with patch(
-            "src.utils.notifications.show_notification", return_value=True
-        ) as mock:
+        with patch("src.utils.notifications.show_notification", return_value=True) as mock:
             result = show_profile_switch_notification("Work", organization="Acme Corp")
             assert result is True
             mock.assert_called_once()
@@ -243,9 +224,7 @@ class TestNotifications:
 
     def test_show_profile_switch_notification_without_org(self) -> None:
         """show_profile_switch_notification should work without org."""
-        with patch(
-            "src.utils.notifications.show_notification", return_value=True
-        ) as mock:
+        with patch("src.utils.notifications.show_notification", return_value=True) as mock:
             result = show_profile_switch_notification("Personal")
             assert result is True
             mock.assert_called_once()
@@ -254,9 +233,7 @@ class TestNotifications:
 
     def test_show_error_notification(self) -> None:
         """show_error_notification should include error in title."""
-        with patch(
-            "src.utils.notifications.show_notification", return_value=True
-        ) as mock:
+        with patch("src.utils.notifications.show_notification", return_value=True) as mock:
             result = show_error_notification("Something went wrong")
             assert result is True
             mock.assert_called_once()
@@ -266,9 +243,7 @@ class TestNotifications:
 
     def test_show_lock_notification(self) -> None:
         """show_lock_notification should mention session locked."""
-        with patch(
-            "src.utils.notifications.show_notification", return_value=True
-        ) as mock:
+        with patch("src.utils.notifications.show_notification", return_value=True) as mock:
             result = show_lock_notification()
             assert result is True
             mock.assert_called_once()

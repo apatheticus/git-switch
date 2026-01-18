@@ -42,7 +42,7 @@ def crypto_service() -> MagicMock:
 
 
 @pytest.fixture
-def session_manager(crypto_service: MagicMock, temp_dir: Path) -> "SessionManager":
+def session_manager(crypto_service: MagicMock, temp_dir: Path) -> SessionManager:
     """Create a SessionManager instance for testing."""
     from src.core.session import SessionManager
 
@@ -54,9 +54,7 @@ def session_manager(crypto_service: MagicMock, temp_dir: Path) -> "SessionManage
 
 
 @pytest.fixture
-def session_manager_with_password(
-    crypto_service: MagicMock, temp_dir: Path
-) -> "SessionManager":
+def session_manager_with_password(crypto_service: MagicMock, temp_dir: Path) -> SessionManager:
     """Create a SessionManager with an existing master password."""
     import base64
 
@@ -89,13 +87,13 @@ class TestHasMasterPassword:
     """Tests for has_master_password() method."""
 
     def test_has_master_password_returns_false_when_no_config(
-        self, session_manager: "SessionManager"
+        self, session_manager: SessionManager
     ) -> None:
         """has_master_password should return False when no master.json exists."""
         assert session_manager.has_master_password() is False
 
     def test_has_master_password_returns_true_when_config_exists(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """has_master_password should return True when master.json exists."""
         assert session_manager_with_password.has_master_password() is True
@@ -110,7 +108,7 @@ class TestSetupMasterPassword:
     """Tests for setup_master_password() method."""
 
     def test_setup_master_password_creates_master_json(
-        self, session_manager: "SessionManager", temp_dir: Path
+        self, session_manager: SessionManager, temp_dir: Path
     ) -> None:
         """setup_master_password should create master.json file."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -122,7 +120,7 @@ class TestSetupMasterPassword:
             assert master_path.exists()
 
     def test_setup_master_password_stores_salt_and_hash(
-        self, session_manager: "SessionManager", temp_dir: Path, crypto_service: MagicMock
+        self, session_manager: SessionManager, temp_dir: Path, crypto_service: MagicMock
     ) -> None:
         """setup_master_password should store salt and verification hash."""
         with patch("src.core.session.get_master_key_path") as mock_path:
@@ -152,7 +150,7 @@ class TestUnlock:
     """Tests for unlock() method."""
 
     def test_unlock_with_correct_password_returns_true(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """unlock should return True with correct password."""
         crypto_service.verify_password.return_value = True
@@ -162,7 +160,7 @@ class TestUnlock:
         assert result is True
 
     def test_unlock_with_wrong_password_returns_false(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """unlock should return False with wrong password."""
         crypto_service.verify_password.return_value = False
@@ -172,7 +170,7 @@ class TestUnlock:
         assert result is False
 
     def test_unlock_sets_encryption_key(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """unlock should set the encryption key when successful."""
         crypto_service.verify_password.return_value = True
@@ -191,13 +189,13 @@ class TestIsUnlocked:
     """Tests for is_unlocked property."""
 
     def test_is_unlocked_returns_false_when_locked(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """is_unlocked should return False when session is locked."""
         assert session_manager_with_password.is_unlocked is False
 
     def test_is_unlocked_returns_true_after_unlock(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """is_unlocked should return True after successful unlock."""
         crypto_service.verify_password.return_value = True
@@ -216,7 +214,7 @@ class TestLock:
     """Tests for lock() method."""
 
     def test_lock_clears_encryption_key(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """lock should clear the encryption key from memory."""
         crypto_service.verify_password.return_value = True
@@ -228,7 +226,7 @@ class TestLock:
         assert session_manager_with_password.encryption_key is None
 
     def test_encryption_key_is_none_when_locked(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """encryption_key should be None when session is locked."""
         assert session_manager_with_password.encryption_key is None
@@ -243,20 +241,17 @@ class TestChangeMasterPassword:
     """Tests for change_master_password() method."""
 
     def test_change_master_password_success(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """change_master_password should succeed with correct current password."""
-        from src.models.exceptions import InvalidPasswordError
 
         crypto_service.verify_password.return_value = True
 
         # Should not raise
-        session_manager_with_password.change_master_password(
-            "CurrentPassword!", "NewPassword123!"
-        )
+        session_manager_with_password.change_master_password("CurrentPassword!", "NewPassword123!")
 
     def test_change_master_password_wrong_current_raises(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """change_master_password should raise InvalidPasswordError with wrong current password."""
         from src.models.exceptions import InvalidPasswordError
@@ -264,9 +259,7 @@ class TestChangeMasterPassword:
         crypto_service.verify_password.return_value = False
 
         with pytest.raises(InvalidPasswordError):
-            session_manager_with_password.change_master_password(
-                "WrongCurrent!", "NewPassword123!"
-            )
+            session_manager_with_password.change_master_password("WrongCurrent!", "NewPassword123!")
 
 
 # =============================================================================
@@ -278,7 +271,7 @@ class TestIdleTimer:
     """Tests for idle timer functionality."""
 
     def test_reset_idle_timer_resets_timer(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """reset_idle_timer should reset the auto-lock timer."""
         crypto_service.verify_password.return_value = True
@@ -288,7 +281,7 @@ class TestIdleTimer:
         session_manager_with_password.reset_idle_timer()
 
     def test_set_lock_callback_stores_callback(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """set_lock_callback should store the callback function."""
         callback_called = []
@@ -311,9 +304,7 @@ class TestAutoLockTimer:
     """Tests for auto-lock timer behavior."""
 
     @pytest.fixture
-    def fast_lock_manager(
-        self, crypto_service: MagicMock, temp_dir: Path
-    ) -> "SessionManager":
+    def fast_lock_manager(self, crypto_service: MagicMock, temp_dir: Path) -> SessionManager:
         """Create a SessionManager with very short auto-lock timeout for testing."""
         import base64
 
@@ -467,9 +458,7 @@ class TestAutoLockTimer:
             time.sleep(0.1)
             assert manager.is_unlocked is False
 
-    def test_lock_cancels_timer(
-        self, crypto_service: MagicMock, temp_dir: Path
-    ) -> None:
+    def test_lock_cancels_timer(self, crypto_service: MagicMock, temp_dir: Path) -> None:
         """Manual lock should cancel the auto-lock timer."""
         import base64
 
@@ -499,9 +488,7 @@ class TestAutoLockTimer:
             # Timer should be cancelled
             assert manager._auto_lock_timer is None
 
-    def test_callback_invoked_on_auto_lock(
-        self, crypto_service: MagicMock, temp_dir: Path
-    ) -> None:
+    def test_callback_invoked_on_auto_lock(self, crypto_service: MagicMock, temp_dir: Path) -> None:
         """Lock callback should be called when auto-lock triggers."""
         import base64
 
@@ -547,7 +534,7 @@ class TestAutoLockTimer:
             assert len(callback_invoked) == 1
 
     def test_timer_not_started_when_locked(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """Timer operations should be no-op when session is locked."""
         # Session is locked (not unlocked yet)
@@ -569,7 +556,7 @@ class TestSessionEdgeCases:
     """Tests for edge cases in session management."""
 
     def test_unlock_without_master_password_setup_fails(
-        self, session_manager: "SessionManager"
+        self, session_manager: SessionManager
     ) -> None:
         """unlock should fail gracefully when no master password is set up."""
         from src.models.exceptions import AuthenticationError
@@ -578,7 +565,7 @@ class TestSessionEdgeCases:
             session_manager.unlock("SomePassword!")
 
     def test_lock_when_already_locked_is_safe(
-        self, session_manager_with_password: "SessionManager"
+        self, session_manager_with_password: SessionManager
     ) -> None:
         """lock should be safe to call when already locked."""
         # Should not raise
@@ -586,7 +573,7 @@ class TestSessionEdgeCases:
         session_manager_with_password.lock()
 
     def test_multiple_unlock_attempts(
-        self, session_manager_with_password: "SessionManager", crypto_service: MagicMock
+        self, session_manager_with_password: SessionManager, crypto_service: MagicMock
     ) -> None:
         """Multiple unlock attempts should work correctly."""
         crypto_service.verify_password.return_value = False

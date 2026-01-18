@@ -108,9 +108,7 @@ class GitService:
             else:
                 # Unset signing config
                 self._run_git_config_unset("--global", "user.signingkey")
-                self._run_git_config(
-                    "--global", "commit.gpgsign", "true" if gpg_sign else "false"
-                )
+                self._run_git_config("--global", "commit.gpgsign", "true" if gpg_sign else "false")
 
         except subprocess.TimeoutExpired as e:
             raise GitServiceError(f"Git command timed out: {e}") from e
@@ -189,9 +187,7 @@ class GitService:
 
             # Handle signing key
             if signing_key:
-                self._run_git_config(
-                    "--local", "user.signingkey", signing_key, cwd=repo_path
-                )
+                self._run_git_config("--local", "user.signingkey", signing_key, cwd=repo_path)
                 self._run_git_config("--local", "commit.gpgsign", "true", cwd=repo_path)
             else:
                 # Unset signing config
@@ -254,9 +250,7 @@ class GitService:
                 cwd=str(cwd) if cwd else None,
             )
             if process.returncode != 0:
-                raise GitServiceError(
-                    f"Failed to set {key}: {process.stderr.strip()}"
-                )
+                raise GitServiceError(f"Failed to set {key}: {process.stderr.strip()}")
         except subprocess.TimeoutExpired as e:
             raise GitServiceError(f"Git command timed out: {e}") from e
 

@@ -62,9 +62,7 @@ class TestAddRepository:
         mock_profile: MagicMock,
     ) -> None:
         """Adding a repository with a profile assignment works."""
-        repo = repository_manager.add_repository(
-            mock_git_repo, assigned_profile_id=mock_profile.id
-        )
+        repo = repository_manager.add_repository(mock_git_repo, assigned_profile_id=mock_profile.id)
 
         assert repo.assigned_profile_id == mock_profile.id
 

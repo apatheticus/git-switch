@@ -12,7 +12,6 @@ TDD Note: These tests exercise the full workflow with real components
 
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -31,7 +30,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def real_crypto_service() -> "CryptoService":
+def real_crypto_service() -> CryptoService:
     """Create a real CryptoService for e2e testing."""
     from src.core.crypto import CryptoService
 
@@ -39,9 +38,7 @@ def real_crypto_service() -> "CryptoService":
 
 
 @pytest.fixture
-def e2e_session_manager(
-    real_crypto_service: "CryptoService", temp_dir: Path
-) -> "SessionManager":
+def e2e_session_manager(real_crypto_service: CryptoService, temp_dir: Path) -> SessionManager:
     """Create a SessionManager with real crypto for e2e testing."""
     from src.core.session import SessionManager
 
@@ -52,13 +49,13 @@ def e2e_session_manager(
 
 
 @pytest.fixture
-def e2e_session_factory(real_crypto_service: "CryptoService", temp_dir: Path):
+def e2e_session_factory(real_crypto_service: CryptoService, temp_dir: Path):
     """Factory for creating new SessionManager instances (simulates restart)."""
     from src.core.session import SessionManager
 
     master_path = temp_dir / "master.json"
 
-    def create_session(auto_lock_timeout: int = 15) -> "SessionManager":
+    def create_session(auto_lock_timeout: int = 15) -> SessionManager:
         with patch("src.core.session.get_master_key_path") as mock_path:
             mock_path.return_value = master_path
             return SessionManager(real_crypto_service, auto_lock_timeout=auto_lock_timeout)
@@ -74,9 +71,7 @@ def e2e_session_factory(real_crypto_service: "CryptoService", temp_dir: Path):
 class TestPasswordWorkflow:
     """E2E tests for master password workflow."""
 
-    def test_first_time_setup_and_unlock(
-        self, e2e_session_manager: "SessionManager"
-    ) -> None:
+    def test_first_time_setup_and_unlock(self, e2e_session_manager: SessionManager) -> None:
         """First launch: set master password, lock, unlock with correct password."""
         # First-time: no master password exists
         assert e2e_session_manager.has_master_password() is False
@@ -102,7 +97,7 @@ class TestPasswordWorkflow:
         assert e2e_session_manager.encryption_key is not None
 
     def test_unlock_with_wrong_password_rejected(
-        self, e2e_session_manager: "SessionManager"
+        self, e2e_session_manager: SessionManager
     ) -> None:
         """Wrong password should be rejected, correct password should work."""
         # Setup password first
@@ -151,7 +146,6 @@ class TestPasswordWorkflow:
 
     def test_auto_lock_workflow(self, e2e_session_factory) -> None:
         """Session auto-locks after idle timeout."""
-        from src.core.session import SessionManager
 
         # Create session with very short timeout
         session = e2e_session_factory(auto_lock_timeout=1)
@@ -216,9 +210,7 @@ class TestPasswordWorkflow:
 class TestPasswordSecurityEdgeCases:
     """Additional security-focused e2e tests."""
 
-    def test_encryption_key_different_per_session(
-        self, e2e_session_factory
-    ) -> None:
+    def test_encryption_key_different_per_session(self, e2e_session_factory) -> None:
         """Encryption keys should be consistent when derived from same password."""
         session1 = e2e_session_factory()
         session1.setup_master_password("ConsistentKey!")
@@ -232,7 +224,7 @@ class TestPasswordSecurityEdgeCases:
         # Keys should be the same (deterministic derivation)
         assert key1 == key2
 
-    def test_memory_cleared_on_lock(self, e2e_session_manager: "SessionManager") -> None:
+    def test_memory_cleared_on_lock(self, e2e_session_manager: SessionManager) -> None:
         """Encryption key should be cleared from memory on lock."""
         e2e_session_manager.setup_master_password("MemoryClear!")
 
@@ -251,9 +243,7 @@ class TestPasswordSecurityEdgeCases:
         # Note: The bytearray reference is set to None after zeroing
         assert e2e_session_manager._encryption_key is None
 
-    def test_lock_callback_triggered(
-        self, e2e_session_factory
-    ) -> None:
+    def test_lock_callback_triggered(self, e2e_session_factory) -> None:
         """Lock callback should be triggered on auto-lock."""
         import threading
 

@@ -13,7 +13,7 @@ and should FAIL until the implementation is complete.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def credential_service() -> "CredentialService":
+def credential_service() -> CredentialService:
     """Create a CredentialService instance for testing."""
     from src.services.credential_service import CredentialService
 
@@ -43,12 +43,10 @@ class TestListGitCredentials:
     """Tests for list_git_credentials() method."""
 
     def test_list_git_credentials_returns_git_targets(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """list_git_credentials should return Git-related credential targets."""
-        with patch.object(
-            credential_service, "_enumerate_credentials"
-        ) as mock_enum:
+        with patch.object(credential_service, "_enumerate_credentials") as mock_enum:
             mock_enum.return_value = [
                 "git:https://github.com",
                 "git:https://gitlab.com",
@@ -65,12 +63,10 @@ class TestListGitCredentials:
             assert "other:unrelated:credential" not in result
 
     def test_list_git_credentials_returns_empty_when_no_credentials(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """list_git_credentials should return empty list when no Git credentials exist."""
-        with patch.object(
-            credential_service, "_enumerate_credentials"
-        ) as mock_enum:
+        with patch.object(credential_service, "_enumerate_credentials") as mock_enum:
             mock_enum.return_value = []
 
             result = credential_service.list_git_credentials()
@@ -87,12 +83,10 @@ class TestDeleteCredential:
     """Tests for delete_credential() method."""
 
     def test_delete_credential_removes_specific_target(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """delete_credential should remove a specific credential by target."""
-        with patch.object(
-            credential_service, "_delete_credential_impl"
-        ) as mock_delete:
+        with patch.object(credential_service, "_delete_credential_impl") as mock_delete:
             mock_delete.return_value = True
 
             result = credential_service.delete_credential("git:https://github.com")
@@ -101,12 +95,10 @@ class TestDeleteCredential:
             mock_delete.assert_called_once_with("git:https://github.com")
 
     def test_delete_credential_returns_false_when_not_found(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """delete_credential should return False when credential doesn't exist."""
-        with patch.object(
-            credential_service, "_delete_credential_impl"
-        ) as mock_delete:
+        with patch.object(credential_service, "_delete_credential_impl") as mock_delete:
             mock_delete.return_value = False
 
             result = credential_service.delete_credential("nonexistent:target")
@@ -123,16 +115,12 @@ class TestClearGitCredentials:
     """Tests for clear_git_credentials() method."""
 
     def test_clear_git_credentials_removes_all_git_credentials(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """clear_git_credentials should remove all Git-related credentials."""
         with (
-            patch.object(
-                credential_service, "list_git_credentials"
-            ) as mock_list,
-            patch.object(
-                credential_service, "delete_credential"
-            ) as mock_delete,
+            patch.object(credential_service, "list_git_credentials") as mock_list,
+            patch.object(credential_service, "delete_credential") as mock_delete,
         ):
             mock_list.return_value = [
                 "git:https://github.com",
@@ -148,12 +136,10 @@ class TestClearGitCredentials:
             assert mock_delete.call_count == 2
 
     def test_clear_git_credentials_returns_empty_when_no_credentials(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """clear_git_credentials should return empty list when no credentials exist."""
-        with patch.object(
-            credential_service, "list_git_credentials"
-        ) as mock_list:
+        with patch.object(credential_service, "list_git_credentials") as mock_list:
             mock_list.return_value = []
 
             result = credential_service.clear_git_credentials()
@@ -170,12 +156,10 @@ class TestHasCredential:
     """Tests for has_credential() method."""
 
     def test_has_credential_returns_true_when_exists(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """has_credential should return True when credential exists."""
-        with patch.object(
-            credential_service, "_get_credential"
-        ) as mock_get:
+        with patch.object(credential_service, "_get_credential") as mock_get:
             mock_get.return_value = {"target": "git:https://github.com"}
 
             result = credential_service.has_credential("git:https://github.com")
@@ -183,12 +167,10 @@ class TestHasCredential:
             assert result is True
 
     def test_has_credential_returns_false_when_missing(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """has_credential should return False when credential doesn't exist."""
-        with patch.object(
-            credential_service, "_get_credential"
-        ) as mock_get:
+        with patch.object(credential_service, "_get_credential") as mock_get:
             mock_get.return_value = None
 
             result = credential_service.has_credential("nonexistent:target")
@@ -205,7 +187,7 @@ class TestCredentialServiceIntegration:
     """Tests verifying CredentialService behavior with mocked Windows API."""
 
     def test_credential_patterns_filter_correctly(
-        self, credential_service: "CredentialService"
+        self, credential_service: CredentialService
     ) -> None:
         """Credential filtering should identify all Git-related patterns."""
         test_credentials = [
@@ -216,9 +198,7 @@ class TestCredentialServiceIntegration:
             "Microsoft:Office:Settings",
         ]
 
-        with patch.object(
-            credential_service, "_enumerate_credentials"
-        ) as mock_enum:
+        with patch.object(credential_service, "_enumerate_credentials") as mock_enum:
             mock_enum.return_value = test_credentials
 
             result = credential_service.list_git_credentials()

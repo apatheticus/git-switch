@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def ssh_service() -> "SSHService":
+def ssh_service() -> SSHService:
     """Create an SSHService instance for testing."""
     from src.services.ssh_service import SSHService
 
@@ -62,7 +62,7 @@ class TestIsAgentRunning:
     """Tests for is_agent_running() method."""
 
     def test_is_agent_running_returns_true_when_service_running(
-        self, ssh_service: "SSHService"
+        self, ssh_service: SSHService
     ) -> None:
         """is_agent_running should return True when ssh-agent service is running."""
         with patch("subprocess.run") as mock_run:
@@ -78,7 +78,7 @@ class TestIsAgentRunning:
             assert result is True
 
     def test_is_agent_running_returns_false_when_service_stopped(
-        self, ssh_service: "SSHService"
+        self, ssh_service: SSHService
     ) -> None:
         """is_agent_running should return False when ssh-agent is not running."""
         with patch("subprocess.run") as mock_run:
@@ -101,9 +101,7 @@ class TestIsAgentRunning:
 class TestStartAgent:
     """Tests for start_agent() method."""
 
-    def test_start_agent_starts_ssh_agent_service(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_start_agent_starts_ssh_agent_service(self, ssh_service: SSHService) -> None:
         """start_agent should start the ssh-agent Windows service."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -114,9 +112,7 @@ class TestStartAgent:
             # Verify net start or sc start was called
             assert mock_run.called
 
-    def test_start_agent_returns_false_on_failure(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_start_agent_returns_false_on_failure(self, ssh_service: SSHService) -> None:
         """start_agent should return False if service fails to start."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -138,9 +134,7 @@ class TestStartAgent:
 class TestListKeys:
     """Tests for list_keys() method."""
 
-    def test_list_keys_returns_loaded_fingerprints(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_list_keys_returns_loaded_fingerprints(self, ssh_service: SSHService) -> None:
         """list_keys should return fingerprints of keys in the agent."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -156,9 +150,7 @@ class TestListKeys:
             assert "SHA256:abcd1234efgh5678" in result
             assert "SHA256:wxyz9876qrst4321" in result
 
-    def test_list_keys_returns_empty_when_no_keys(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_list_keys_returns_empty_when_no_keys(self, ssh_service: SSHService) -> None:
         """list_keys should return empty list when no keys are loaded."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -181,11 +173,13 @@ class TestAddKey:
     """Tests for add_key() method."""
 
     def test_add_key_adds_private_key_to_agent(
-        self, ssh_service: "SSHService", temp_dir: Path
+        self, ssh_service: SSHService, temp_dir: Path
     ) -> None:
         """add_key should add a private key file to the ssh-agent."""
         key_path = temp_dir / "test_key"
-        key_path.write_bytes(b"-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----")
+        key_path.write_bytes(
+            b"-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----"
+        )
 
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="Identity added", stderr="")
@@ -196,12 +190,12 @@ class TestAddKey:
             # Verify ssh-add was called with key path
             assert mock_run.called
 
-    def test_add_key_with_passphrase(
-        self, ssh_service: "SSHService", temp_dir: Path
-    ) -> None:
+    def test_add_key_with_passphrase(self, ssh_service: SSHService, temp_dir: Path) -> None:
         """add_key should handle passphrase-protected keys."""
         key_path = temp_dir / "test_key"
-        key_path.write_bytes(b"-----BEGIN OPENSSH PRIVATE KEY-----\nencrypted\n-----END OPENSSH PRIVATE KEY-----")
+        key_path.write_bytes(
+            b"-----BEGIN OPENSSH PRIVATE KEY-----\nencrypted\n-----END OPENSSH PRIVATE KEY-----"
+        )
 
         with (
             patch("subprocess.Popen") as mock_popen,
@@ -222,9 +216,7 @@ class TestAddKey:
 class TestRemoveAllKeys:
     """Tests for remove_all_keys() method."""
 
-    def test_remove_all_keys_clears_agent(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_remove_all_keys_clears_agent(self, ssh_service: SSHService) -> None:
         """remove_all_keys should remove all keys from the ssh-agent."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -249,9 +241,7 @@ class TestRemoveAllKeys:
 class TestTestConnection:
     """Tests for test_connection() method."""
 
-    def test_test_connection_success_returns_username(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_test_connection_success_returns_username(self, ssh_service: SSHService) -> None:
         """test_connection should return success with username on successful connection."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -265,9 +255,7 @@ class TestTestConnection:
             assert success is True
             assert "testuser" in message
 
-    def test_test_connection_failure_returns_error(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_test_connection_failure_returns_error(self, ssh_service: SSHService) -> None:
         """test_connection should return failure with error message on failure."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -291,7 +279,7 @@ class TestGetKeyFingerprint:
     """Tests for get_key_fingerprint() method."""
 
     def test_get_key_fingerprint_returns_sha256_format(
-        self, ssh_service: "SSHService", sample_ed25519_public_key: bytes
+        self, ssh_service: SSHService, sample_ed25519_public_key: bytes
     ) -> None:
         """get_key_fingerprint should return fingerprint in SHA256:xxx format."""
         # The implementation uses base64 decoding and hashlib directly
@@ -309,9 +297,7 @@ class TestGetKeyFingerprint:
 class TestValidatePrivateKey:
     """Tests for validate_private_key() method."""
 
-    def test_validate_private_key_accepts_valid_key(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_validate_private_key_accepts_valid_key(self, ssh_service: SSHService) -> None:
         """validate_private_key should accept a valid unencrypted private key."""
         # Valid Ed25519 private key structure (test only)
         valid_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----
@@ -328,9 +314,7 @@ bXBsZS5jb20BAgMEBQ==
         assert valid is True
         assert error == ""
 
-    def test_validate_private_key_rejects_invalid_format(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_validate_private_key_rejects_invalid_format(self, ssh_service: SSHService) -> None:
         """validate_private_key should reject keys with invalid format."""
         invalid_key = b"not a valid ssh key format"
 
@@ -339,9 +323,7 @@ bXBsZS5jb20BAgMEBQ==
         assert valid is False
         assert error != ""
 
-    def test_validate_private_key_with_correct_passphrase(
-        self, ssh_service: "SSHService"
-    ) -> None:
+    def test_validate_private_key_with_correct_passphrase(self, ssh_service: SSHService) -> None:
         """validate_private_key should accept encrypted key with correct passphrase."""
         # For basic format validation, the key just needs to have PEM markers
         encrypted_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----

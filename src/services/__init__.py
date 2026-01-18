@@ -23,13 +23,13 @@ from src.services.ssh_service import SSHService
 __all__ = [
     # Service Implementations
     "CredentialService",
-    "GitService",
-    "GPGService",
-    "SSHService",
     # Protocols
     "CredentialServiceProtocol",
-    "GitServiceProtocol",
+    "GPGService",
     "GPGServiceProtocol",
+    "GitService",
+    "GitServiceProtocol",
+    "SSHService",
     "SSHServiceProtocol",
     # Container
     "ServiceContainer",

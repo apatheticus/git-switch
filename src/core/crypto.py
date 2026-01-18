@@ -181,7 +181,6 @@ class CryptoService:
             aesgcm = AESGCM(key)
             return aesgcm.decrypt(nonce, encrypted_data, None)
 
-
         except Exception as e:
             # Don't leak sensitive info in error message
             raise EncryptionError("Decryption failed: invalid key or corrupted data") from e

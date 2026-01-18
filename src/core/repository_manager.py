@@ -74,9 +74,7 @@ class RepositoryManager:
             version = data.get("version", 0)
             if version != REPOSITORIES_VERSION:
                 # Future: handle version migration
-                logger.warning(
-                    f"Unknown repositories.json version {version}, starting fresh"
-                )
+                logger.warning(f"Unknown repositories.json version {version}, starting fresh")
                 self._repositories = []
                 return
 
@@ -95,14 +93,10 @@ class RepositoryManager:
         """Save repositories to repositories.json file."""
         data = {
             "version": REPOSITORIES_VERSION,
-            "repositories": [
-                self._serialize_repository(repo) for repo in self._repositories
-            ],
+            "repositories": [self._serialize_repository(repo) for repo in self._repositories],
         }
 
-        self._repositories_path.write_text(
-            json.dumps(data, indent=2), encoding="utf-8"
-        )
+        self._repositories_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     def _serialize_repository(self, repo: Repository) -> dict[str, Any]:
         """Serialize a repository to dictionary for JSON storage.
@@ -321,9 +315,7 @@ class RepositoryManager:
 
         # Check for assigned profile
         if repo.assigned_profile_id is None:
-            raise RepositoryError(
-                f"Repository has no profile assigned: {repo.path}"
-            )
+            raise RepositoryError(f"Repository has no profile assigned: {repo.path}")
 
         # Apply profile using ProfileManager
         self._profile_manager.switch_profile(
@@ -332,9 +324,7 @@ class RepositoryManager:
             repo_path=repo.path,
         )
 
-        logger.info(
-            f"Applied profile {repo.assigned_profile_id} to repository {repo.path}"
-        )
+        logger.info(f"Applied profile {repo.assigned_profile_id} to repository {repo.path}")
 
     def validate_repository(self, path: Path) -> bool:
         """Check if path is a valid Git repository.

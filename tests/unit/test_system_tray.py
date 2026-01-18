@@ -82,10 +82,12 @@ def system_tray(
 ) -> SystemTrayIcon:
     """Create a SystemTrayIcon instance for testing."""
     # Import with mocked dependencies
-    with patch.dict(sys.modules, {"pystray": mock_pystray}), \
-         patch("PIL.Image.open", return_value=MagicMock()), \
-         patch("PIL.Image.new", return_value=MagicMock()), \
-         patch("PIL.ImageDraw.Draw", return_value=MagicMock()):
+    with (
+        patch.dict(sys.modules, {"pystray": mock_pystray}),
+        patch("PIL.Image.open", return_value=MagicMock()),
+        patch("PIL.Image.new", return_value=MagicMock()),
+        patch("PIL.ImageDraw.Draw", return_value=MagicMock()),
+    ):
 
         # Force reimport to pick up mocks
         if "src.ui.system_tray" in sys.modules:
@@ -121,10 +123,12 @@ def create_system_tray_with_mocks(
     on_exit: MagicMock | None = None,
 ) -> SystemTrayIcon:
     """Create a SystemTrayIcon instance with mocked dependencies."""
-    with patch.dict(sys.modules, {"pystray": mock_pystray}), \
-         patch("PIL.Image.open", return_value=MagicMock()), \
-         patch("PIL.Image.new", return_value=MagicMock()), \
-         patch("PIL.ImageDraw.Draw", return_value=MagicMock()):
+    with (
+        patch.dict(sys.modules, {"pystray": mock_pystray}),
+        patch("PIL.Image.open", return_value=MagicMock()),
+        patch("PIL.Image.new", return_value=MagicMock()),
+        patch("PIL.ImageDraw.Draw", return_value=MagicMock()),
+    ):
 
         # Force reimport to pick up mocks
         if "src.ui.system_tray" in sys.modules:
@@ -211,9 +215,7 @@ class TestMenuCallbacks:
 
         system_tray._on_switch_profile(profile_id)
 
-        mock_profile_manager.switch_profile.assert_called_once_with(
-            profile_id, scope="global"
-        )
+        mock_profile_manager.switch_profile.assert_called_once_with(profile_id, scope="global")
 
     def test_switch_profile_callback_handles_session_expired_error(
         self,
@@ -342,8 +344,10 @@ class TestLockStateIntegration:
         mock_session_manager: MagicMock,
     ) -> None:
         """Auto-lock callback should update the menu."""
-        with patch.object(system_tray, "update_menu") as mock_update, \
-             patch("src.utils.notifications.show_lock_notification"):
+        with (
+            patch.object(system_tray, "update_menu") as mock_update,
+            patch("src.utils.notifications.show_lock_notification"),
+        ):
             system_tray._on_session_locked()
 
             mock_update.assert_called_once()
@@ -519,10 +523,12 @@ class TestIconLoading:
         icon_path = temp_dir / "custom_icon.ico"
         icon_path.write_bytes(b"ICON_DATA")
 
-        with patch.dict(sys.modules, {"pystray": mock_pystray}), \
-             patch("PIL.Image.open", return_value=MagicMock()) as mock_open, \
-             patch("PIL.Image.new", return_value=MagicMock()), \
-             patch("PIL.ImageDraw.Draw", return_value=MagicMock()):
+        with (
+            patch.dict(sys.modules, {"pystray": mock_pystray}),
+            patch("PIL.Image.open", return_value=MagicMock()) as mock_open,
+            patch("PIL.Image.new", return_value=MagicMock()),
+            patch("PIL.ImageDraw.Draw", return_value=MagicMock()),
+        ):
 
             # Force reimport to pick up mocks
             if "src.ui.system_tray" in sys.modules:
@@ -547,10 +553,12 @@ class TestIconLoading:
         """Should use fallback icon when path doesn't exist."""
         nonexistent_path = temp_dir / "nonexistent.ico"
 
-        with patch.dict(sys.modules, {"pystray": mock_pystray}), \
-             patch("PIL.Image.open", side_effect=FileNotFoundError()), \
-             patch("PIL.Image.new", return_value=MagicMock()) as mock_new, \
-             patch("PIL.ImageDraw.Draw", return_value=MagicMock()):
+        with (
+            patch.dict(sys.modules, {"pystray": mock_pystray}),
+            patch("PIL.Image.open", side_effect=FileNotFoundError()),
+            patch("PIL.Image.new", return_value=MagicMock()) as mock_new,
+            patch("PIL.ImageDraw.Draw", return_value=MagicMock()),
+        ):
 
             # Force reimport to pick up mocks
             if "src.ui.system_tray" in sys.modules:
@@ -573,10 +581,12 @@ class TestIconLoading:
         mock_profile_manager: MagicMock,
     ) -> None:
         """Should use fallback icon when no path is provided."""
-        with patch.dict(sys.modules, {"pystray": mock_pystray}), \
-             patch("PIL.Image.open", return_value=MagicMock()), \
-             patch("PIL.Image.new", return_value=MagicMock()) as mock_new, \
-             patch("PIL.ImageDraw.Draw", return_value=MagicMock()):
+        with (
+            patch.dict(sys.modules, {"pystray": mock_pystray}),
+            patch("PIL.Image.open", return_value=MagicMock()),
+            patch("PIL.Image.new", return_value=MagicMock()) as mock_new,
+            patch("PIL.ImageDraw.Draw", return_value=MagicMock()),
+        ):
 
             # Force reimport to pick up mocks
             if "src.ui.system_tray" in sys.modules:
