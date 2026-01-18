@@ -62,13 +62,13 @@ jobs:
       - name: Rename artifact with version
         run: |
           $version = "${{ needs.release-please.outputs.version }}"
-          Move-Item "dist/GitProfileSwitcher.exe" "dist/GitProfileSwitcher-v${version}-win64.exe"
+          Move-Item "dist/Git-Switch.exe" "dist/Git-Switch-v${version}-win64.exe"
         shell: pwsh
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.release-please.outputs.tag_name }}
-          files: dist/GitProfileSwitcher-v${{ needs.release-please.outputs.version }}-win64.exe
+          files: dist/Git-Switch-v${{ needs.release-please.outputs.version }}-win64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

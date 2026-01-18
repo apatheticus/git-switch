@@ -334,7 +334,7 @@ stateDiagram-v2
 ### File Structure
 
 ```
-%APPDATA%/GitProfileSwitcher/
+%APPDATA%/Git-Switch/
 ├── config.json           # Settings (unencrypted)
 ├── master.json           # MasterKeyConfig (salt + verification hash)
 ├── profiles.dat          # Encrypted profiles blob

@@ -15,7 +15,7 @@ Git-Switch is a Windows desktop application that enables developers to seamlessl
 
 **Language/Version**: Python 3.11+
 **Primary Dependencies**: DearPyGui (1.10+), cryptography (41+), paramiko (3.3+), GitPython (3.1+), python-gnupg (0.5+), keyring (24+), pywin32 (306+), pystray (0.19+)
-**Storage**: File-based encrypted storage in `%APPDATA%/GitProfileSwitcher/` (profiles.dat, config.json, repositories.json)
+**Storage**: File-based encrypted storage in `%APPDATA%/Git-Switch/` (profiles.dat, config.json, repositories.json)
 **Testing**: pytest with pytest-mock for unit/integration tests
 **Target Platform**: Windows 10/11 (64-bit) with OpenSSH, Git, optional GnuPG
 **Project Type**: Single desktop application

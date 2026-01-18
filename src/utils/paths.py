@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 
 # Application name for data directories
-APP_NAME = "GitProfileSwitcher"
+APP_NAME = "Git-Switch"
 
 
 def get_app_data_dir() -> Path:
@@ -20,7 +20,7 @@ def get_app_data_dir() -> Path:
     APPDATA folder on Windows.
 
     Returns:
-        Path to %APPDATA%/GitProfileSwitcher/
+        Path to %APPDATA%/Git-Switch/
 
     Note:
         Creates the directory if it doesn't exist.

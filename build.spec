@@ -12,7 +12,7 @@ Build command:
     pyinstaller build.spec
 
 Output:
-    dist/GitProfileSwitcher.exe
+    dist/Git-Switch.exe
 """
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
@@ -173,7 +173,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='GitProfileSwitcher',
+    name='Git-Switch',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

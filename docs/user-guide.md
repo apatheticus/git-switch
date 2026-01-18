@@ -469,7 +469,7 @@ There is **no recovery option**. You must reset the application.
 2. Delete the data folder:
 
    ```text
-   %APPDATA%\GitProfileSwitcher\
+   %APPDATA%\Git-Switch\
    ```
 
 3. Restart Git-Switch
@@ -519,5 +519,5 @@ python -m src.main --debug
 Logs are written to:
 
 ```text
-%APPDATA%\GitProfileSwitcher\logs\
+%APPDATA%\Git-Switch\logs\
 ```

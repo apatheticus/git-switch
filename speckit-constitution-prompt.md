@@ -1,6 +1,6 @@
-# Constitution Prompt for Git Profile Switcher
+# Constitution Prompt for Git-Switch
 
-Use this prompt with the `/speckit.constitution` command to establish the foundational principles for the Git Profile Switcher project.
+Use this prompt with the `/speckit.constitution` command to establish the foundational principles for the Git-Switch project.
 
 ---
 
@@ -9,7 +9,7 @@ Use this prompt with the `/speckit.constitution` command to establish the founda
 ```
 /speckit.constitution
 
-Create a comprehensive project constitution for Git Profile Switcher, a Windows desktop application that enables developers to seamlessly switch between multiple Git/GitHub user profiles. The application manages Git configurations, SSH keys, GPG signing keys, and Windows Credential Manager entries through a modern, GPU-accelerated GUI built with DearPyGui.
+Create a comprehensive project constitution for Git-Switch, a Windows desktop application that enables developers to seamlessly switch between multiple Git/GitHub user profiles. The application manages Git configurations, SSH keys, GPG signing keys, and Windows Credential Manager entries through a modern, GPU-accelerated GUI built with DearPyGui.
 
 The constitution MUST establish the following non-negotiable principles organized by priority:
 
@@ -142,7 +142,7 @@ This is a Windows-native application. Establish principles that:
 
 1. **Native Services Only**: Use Windows OpenSSH ssh-agent (not Pageant, not third-party). Use Windows Credential Manager via keyring. Use Windows Toast Notifications.
 
-2. **Portable Execution**: Single .exe file, no installation required, no admin privileges for normal operation. User data in %APPDATA%/GitProfileSwitcher.
+2. **Portable Execution**: Single .exe file, no installation required, no admin privileges for normal operation. User data in %APPDATA%/Git-Switch.
 
 3. **Graceful Degradation**: If Git is not installed, show helpful error—don't crash. If GPG is not installed, disable GPG features—don't block the app. If ssh-agent isn't running, offer to start it.
 
@@ -175,7 +175,7 @@ Synthesize these principles into a cohesive constitution document that AI agents
 
 1. Initialize your project with Spec Kit:
    ```bash
-   specify init GitProfileSwitcher --ai claude
+   specify init Git-Switch --ai claude
    ```
 
 2. Open your AI coding agent (Claude Code, Cursor, etc.)
@@ -193,7 +193,7 @@ Synthesize these principles into a cohesive constitution document that AI agents
 The constitution command should generate a `constitution.md` file with approximately this structure:
 
 ```markdown
-# Project Constitution: Git Profile Switcher
+# Project Constitution: Git-Switch
 
 ## Preamble
 [Project purpose and scope]

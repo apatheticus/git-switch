@@ -182,7 +182,7 @@ ruff check src/ tests/
 # Build single-file executable
 pyinstaller build.spec
 
-# Output: dist/GitProfileSwitcher.exe
+# Output: dist/Git-Switch.exe
 ```
 
 ---

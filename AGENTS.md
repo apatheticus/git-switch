@@ -1,7 +1,7 @@
-# AGENTS.md — Git Profile Switcher
+# AGENTS.md — Git-Switch
 
 > **AI Agent Guidance Document**  
-> This document provides essential context, constraints, and guardrails for AI coding agents working on the Git Profile Switcher project. It follows [GitHub Spec Kit](https://github.com/github/spec-kit) conventions for Spec-Driven Development (SDD).
+> This document provides essential context, constraints, and guardrails for AI coding agents working on the Git-Switch project. It follows [GitHub Spec Kit](https://github.com/github/spec-kit) conventions for Spec-Driven Development (SDD).
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## Project Overview
 
-**Git Profile Switcher** is a Windows desktop utility that enables developers to seamlessly switch between multiple Git/GitHub user profiles. The application provides a modern, GPU-accelerated graphical interface for managing Git identities, SSH keys, GPG signing keys, and cached credentials.
+**Git-Switch** is a Windows desktop utility that enables developers to seamlessly switch between multiple Git/GitHub user profiles. The application provides a modern, GPU-accelerated graphical interface for managing Git identities, SSH keys, GPG signing keys, and cached credentials.
 
 ### Key Capabilities
 
@@ -194,7 +194,7 @@ flowchart TB
 ## Project Directory Structure
 
 ```
-GitProfileSwitcher/
+Git-Switch/
 ├── .specify/                          # Spec Kit configuration
 │   ├── memory/
 │   │   └── constitution.md            # Project constitution
@@ -558,7 +558,7 @@ pytest -k "test_encryption"
 # build.spec - KEY REQUIREMENTS
 exe = EXE(
     ...
-    name='GitProfileSwitcher',
+    name='Git-Switch',
     console=False,        # NO console window
     uac_admin=False,      # NO admin rights required
     icon='assets/icons/app_icon.ico',
@@ -571,7 +571,7 @@ exe = EXE(
 - [ ] File size < 100MB
 - [ ] Runs without installation
 - [ ] Runs without admin privileges
-- [ ] Creates `%APPDATA%/GitProfileSwitcher` on first run
+- [ ] Creates `%APPDATA%/Git-Switch` on first run
 - [ ] No console window appears
 - [ ] System tray icon displays correctly
 - [ ] All assets bundled (icons, fonts)
@@ -580,8 +580,8 @@ exe = EXE(
 
 | Artifact | Description |
 |----------|-------------|
-| `GitProfileSwitcher-{version}.exe` | Main executable |
-| `GitProfileSwitcher-{version}.exe.sha256` | SHA256 checksum |
+| `Git-Switch-{version}.exe` | Main executable |
+| `Git-Switch-{version}.exe.sha256` | SHA256 checksum |
 | `CHANGELOG.md` | Release notes |
 
 ---
