@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/apatheticus/git-switch/compare/v0.1.1...v0.1.2) (2026-01-18)
+
+
+### Documentation
+
+* add comprehensive project documentation ([#8](https://github.com/apatheticus/git-switch/issues/8)) ([e3d306f](https://github.com/apatheticus/git-switch/commit/e3d306f0bc1bcc486a420eaf2c7b79d4788b23ec))
+
 ## [0.1.1](https://github.com/apatheticus/git-switch/compare/v0.1.0...v0.1.1) (2026-01-18)
 
 
