@@ -114,7 +114,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph Storage["Storage Location: %APPDATA%/GitProfileSwitcher"]
+    subgraph Storage["Storage Location: %APPDATA%/Git-Switch"]
         Config["config.json\n(App Settings)"]
         Profiles["profiles.dat\n(Encrypted Profiles)"]
         Keys["keys/\n(Encrypted SSH & GPG)"]
@@ -562,7 +562,7 @@ flowchart TB
 
 ### 7.2 Settings Storage
 
-Settings stored in `%APPDATA%/GitProfileSwitcher/config.json` (unencrypted, no sensitive data)
+Settings stored in `%APPDATA%/Git-Switch/config.json` (unencrypted, no sensitive data)
 
 ---
 
@@ -585,7 +585,7 @@ Settings stored in `%APPDATA%/GitProfileSwitcher/config.json` (unencrypted, no s
 ### 8.2 Directory Structure
 
 ```
-GitProfileSwitcher/
+Git-Switch/
 ├── src/
 │   ├── main.py                 # Application entry point
 │   ├── ui/
@@ -665,7 +665,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='GitProfileSwitcher',
+    name='Git-Switch',
     debug=False,
     strip=False,
     upx=True,
@@ -789,14 +789,14 @@ flowchart TD
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Run PyInstaller: `pyinstaller build.spec`
-3. Output: `dist/GitProfileSwitcher.exe`
+3. Output: `dist/Git-Switch.exe`
 
 ### 11.2 Distribution
 
 - Single portable `.exe` file
 - No installation required
 - User runs directly from any location
-- First run creates `%APPDATA%/GitProfileSwitcher/` directory
+- First run creates `%APPDATA%/Git-Switch/` directory
 
 ---
 

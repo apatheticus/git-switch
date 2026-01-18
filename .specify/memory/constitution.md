@@ -34,15 +34,15 @@ Follow-up TODOs:
 ================================================================================
 -->
 
-# Git Profile Switcher Constitution
+# Git-Switch Constitution
 
 ## Preamble
 
 This constitution establishes the non-negotiable principles, constraints, and governance
-rules for the Git Profile Switcher project. It serves as the single source of truth for
+rules for the Git-Switch project. It serves as the single source of truth for
 "how we build software" in this project.
 
-**Project Summary**: Git Profile Switcher is a Windows desktop application that enables
+**Project Summary**: Git-Switch is a Windows desktop application that enables
 developers to seamlessly switch between multiple Git/GitHub user profiles. The application
 manages Git configurations, SSH keys, GPG signing keys, and Windows Credential Manager
 entries through a modern, GPU-accelerated GUI built with DearPyGui.
@@ -220,7 +220,7 @@ intuitive and accessible. Form follows function, but form matters.
    - Consistent button placement: Confirm/Primary on right, Cancel/Secondary on left
 
 7. **State Persistence**: Remember window position, size, and UI state between sessions.
-   Restore user's last view on launch. Persist to `%APPDATA%/GitProfileSwitcher/ui_state.json`.
+   Restore user's last view on launch. Persist to `%APPDATA%/Git-Switch/ui_state.json`.
 
 **Rationale**: A polished UI builds trust—essential for an application handling security
 credentials. Poor UX leads to user errors, which in credential management can be costly.
@@ -282,7 +282,7 @@ feature.
 2. **Portable Execution**:
    - Single `.exe` file distribution via PyInstaller
    - No installation required, no admin privileges for normal operation
-   - All user data stored in `%APPDATA%/GitProfileSwitcher/`
+   - All user data stored in `%APPDATA%/Git-Switch/`
    - No registry modifications except optional auto-start entry
 
 3. **Graceful Degradation**:

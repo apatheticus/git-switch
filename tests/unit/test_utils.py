@@ -51,7 +51,7 @@ class TestPaths:
         """get_app_data_dir should use APPDATA environment variable."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_app_data_dir()
-        assert result == tmp_path / "GitProfileSwitcher"
+        assert result == tmp_path / "Git-Switch"
         assert result.exists()
 
     def test_get_app_data_dir_creates_directory(
@@ -59,7 +59,7 @@ class TestPaths:
     ) -> None:
         """get_app_data_dir should create the directory if it doesn't exist."""
         monkeypatch.setenv("APPDATA", str(tmp_path))
-        app_dir = tmp_path / "GitProfileSwitcher"
+        app_dir = tmp_path / "Git-Switch"
         assert not app_dir.exists()
         get_app_data_dir()
         assert app_dir.exists()
@@ -69,7 +69,7 @@ class TestPaths:
         monkeypatch.setenv("APPDATA", str(tmp_path))
         result = get_profiles_path()
         assert result.name == "profiles.dat"
-        assert "GitProfileSwitcher" in str(result)
+        assert "Git-Switch" in str(result)
 
     def test_get_config_path(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """get_config_path should return path to config.json."""

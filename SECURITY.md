@@ -51,9 +51,9 @@ All sensitive data is encrypted using **AES-256-GCM** (authenticated encryption)
 
 | Data Type | Storage Location | Encryption |
 |-----------|------------------|------------|
-| SSH Private Keys | `%APPDATA%\GitProfileSwitcher\keys\{id}.ssh` | AES-256-GCM |
+| SSH Private Keys | `%APPDATA%\Git-Switch\keys\{id}.ssh` | AES-256-GCM |
 | SSH Passphrases | Embedded in profile data | AES-256-GCM |
-| GPG Private Keys | `%APPDATA%\GitProfileSwitcher\keys\{id}.gpg` | AES-256-GCM |
+| GPG Private Keys | `%APPDATA%\Git-Switch\keys\{id}.gpg` | AES-256-GCM |
 | Profile Metadata | `profiles.dat` | AES-256-GCM |
 
 **Encryption Format:**
@@ -109,7 +109,7 @@ This means:
 │     • Secure memory clearing                                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                  Encrypted Storage                               │
-│            %APPDATA%\GitProfileSwitcher\                        │
+│            %APPDATA%\Git-Switch\                        │
 │     • profiles.dat (encrypted profile metadata)                 │
 │     • keys/*.ssh (encrypted SSH keys)                           │
 │     • keys/*.gpg (encrypted GPG keys)                           │
@@ -171,7 +171,7 @@ These files contain **no secrets** and are stored in plaintext:
 
 - Store your master password in a text file or notes app
 - Disable auto-lock on shared or public computers
-- Share the `%APPDATA%\GitProfileSwitcher` directory
+- Share the `%APPDATA%\Git-Switch` directory
 - Run exported `.gps` archives from untrusted sources
 - Use the same password for Git-Switch and your SSH key passphrases
 - Leave the application running unlocked unattended

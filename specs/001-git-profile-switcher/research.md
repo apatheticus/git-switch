@@ -111,7 +111,7 @@ def list_keys() -> list[str]:
 - Graceful degradation: warn user but don't block application
 
 **Key Storage**:
-- SSH keys stored encrypted in `%APPDATA%/GitProfileSwitcher/keys/`
+- SSH keys stored encrypted in `%APPDATA%/Git-Switch/keys/`
 - Decrypt to temp file, add to agent, securely delete temp file
 - Use `os.remove()` followed by file overwrite pattern for secure deletion
 
@@ -431,7 +431,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='GitProfileSwitcher',
+    name='Git-Switch',
     debug=False,
     strip=False,
     upx=True,

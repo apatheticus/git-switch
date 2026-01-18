@@ -220,7 +220,7 @@ Application Launch
 ### File Layout
 
 ```text
-%APPDATA%\GitProfileSwitcher\
+%APPDATA%\Git-Switch\
 ├── config.json           # App settings (plaintext, no secrets)
 ├── master.json           # Salt + verification hash (not password)
 ├── profiles.dat          # Encrypted profiles (AES-256-GCM)

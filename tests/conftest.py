@@ -42,7 +42,7 @@ def app_data_dir(temp_dir: Path) -> Path:
     Returns:
         Path to the mock app data directory.
     """
-    app_dir = temp_dir / "GitProfileSwitcher"
+    app_dir = temp_dir / "Git-Switch"
     app_dir.mkdir(parents=True, exist_ok=True)
     (app_dir / "keys").mkdir(exist_ok=True)
     return app_dir

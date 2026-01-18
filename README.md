@@ -69,9 +69,9 @@ Git-Switch is a Windows desktop application that enables developers to seamlessl
 
 ### Option 1: Portable Executable (Recommended)
 
-1. Download `GitProfileSwitcher.exe` from the [Releases](https://github.com/apatheticus/git-switch/releases) page
+1. Download `Git-Switch.exe` from the [Releases](https://github.com/apatheticus/git-switch/releases) page
 2. Run the executable - no installation required
-3. Data is stored in `%APPDATA%\GitProfileSwitcher\`
+3. Data is stored in `%APPDATA%\Git-Switch\`
 
 ### Option 2: From Source
 
@@ -100,7 +100,7 @@ pip install -r requirements-dev.txt
 # Build with PyInstaller
 pyinstaller build.spec
 
-# Output: dist/GitProfileSwitcher.exe
+# Output: dist/Git-Switch.exe
 ```
 
 ## Quick Start
