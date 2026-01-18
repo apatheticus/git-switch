@@ -78,7 +78,14 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run ${{ matrix.test-type }} tests
-        run: pytest -m ${{ matrix.test-type }} --cov=src --cov-report=xml --cov-report=term-missing
+        run: |
+          if ("${{ matrix.test-type }}" -eq "unit") {
+            pytest -m ${{ matrix.test-type }} --cov=src --cov-report=xml --cov-report=term-missing
+          } else {
+            # Integration tests don't need to meet coverage threshold
+            pytest -m ${{ matrix.test-type }} --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=0
+          }
+        shell: pwsh
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

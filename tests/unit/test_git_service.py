@@ -60,9 +60,7 @@ class TestIsGitInstalled:
             assert result is True
             mock_which.assert_called_once_with("git")
 
-    def test_is_git_installed_returns_false_when_git_missing(
-        self, git_service: GitService
-    ) -> None:
+    def test_is_git_installed_returns_false_when_git_missing(self, git_service: GitService) -> None:
         """is_git_installed should return False when git is not in PATH."""
         with patch("shutil.which") as mock_which:
             mock_which.return_value = None
@@ -148,9 +146,7 @@ class TestSetGlobalConfig:
             )
             assert any("commit.gpgsign" in str(call) and "true" in str(call) for call in calls)
 
-    def test_set_global_config_unsets_signing_key_when_none(
-        self, git_service: GitService
-    ) -> None:
+    def test_set_global_config_unsets_signing_key_when_none(self, git_service: GitService) -> None:
         """set_global_config should unset signing key when None provided."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")

@@ -220,9 +220,7 @@ class TestSaveSettings:
 class TestGetAutoLockTimeout:
     """Tests for get_auto_lock_timeout() method."""
 
-    def test_get_auto_lock_timeout_returns_default(
-        self, settings_manager: SettingsManager
-    ) -> None:
+    def test_get_auto_lock_timeout_returns_default(self, settings_manager: SettingsManager) -> None:
         """get_auto_lock_timeout should return default when no config."""
         timeout = settings_manager.get_auto_lock_timeout()
         assert timeout == 15

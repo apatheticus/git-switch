@@ -202,9 +202,12 @@ class TestNotifications:
     def test_show_notification_without_win10toast(self) -> None:
         """show_notification should return False if win10toast not installed."""
         # Mock the import to raise ImportError
-        with patch.dict("sys.modules", {"win10toast": None}), patch(
-            "builtins.__import__",
-            side_effect=ImportError("No module named 'win10toast'"),
+        with (
+            patch.dict("sys.modules", {"win10toast": None}),
+            patch(
+                "builtins.__import__",
+                side_effect=ImportError("No module named 'win10toast'"),
+            ),
         ):
             # The function should handle ImportError gracefully
             result = show_notification("Test", "Message")

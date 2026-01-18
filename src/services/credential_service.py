@@ -24,7 +24,6 @@ class SSHService:
     """Placeholder for type hint compatibility."""
 
 
-
 class CredentialService:
     """Windows Credential Manager operations.
 

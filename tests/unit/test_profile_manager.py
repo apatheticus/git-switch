@@ -252,9 +252,7 @@ class TestGetProfile:
         assert profile.name == "Work"
         assert profile.git_email == "work@example.com"
 
-    def test_get_profile_returns_none_when_not_found(
-        self, profile_manager: ProfileManager
-    ) -> None:
+    def test_get_profile_returns_none_when_not_found(self, profile_manager: ProfileManager) -> None:
         """get_profile should return None when profile doesn't exist."""
         random_id = uuid4()
         profile = profile_manager.get_profile(random_id)

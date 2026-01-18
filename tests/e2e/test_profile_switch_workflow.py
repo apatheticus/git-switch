@@ -41,9 +41,7 @@ def real_crypto_service() -> CryptoService:
 
 
 @pytest.fixture
-def e2e_session_manager(
-    real_crypto_service: CryptoService, temp_dir: Path
-) -> SessionManager:
+def e2e_session_manager(real_crypto_service: CryptoService, temp_dir: Path) -> SessionManager:
     """Create a SessionManager with real crypto for e2e testing."""
     from src.core.session import SessionManager
 
@@ -314,9 +312,7 @@ class TestMultiServiceOrchestration:
     ) -> None:
         """Verify credential clearing happens during switch."""
         # Setup mock to return some credentials
-        mock_credential_service.clear_git_credentials.return_value = [
-            "git:https://github.com"
-        ]
+        mock_credential_service.clear_git_credentials.return_value = ["git:https://github.com"]
 
         profile = e2e_profile_manager.create_profile(
             name="Test Profile",
@@ -459,9 +455,7 @@ class TestScopeVariations:
         )
 
         # Switch with local scope
-        e2e_profile_manager.switch_profile(
-            profile.id, scope="local", repo_path=mock_git_repo
-        )
+        e2e_profile_manager.switch_profile(profile.id, scope="local", repo_path=mock_git_repo)
 
         # Verify local config called with repo path
         mock_git_service.set_local_config.assert_called_once_with(

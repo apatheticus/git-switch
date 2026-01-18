@@ -115,11 +115,14 @@ def _build_header(container: ServiceContainer) -> None:
     Args:
         container: Service container for profile information.
     """
-    with dpg.child_window(
-        height=HEADER_HEIGHT - PADDING_MEDIUM,
-        no_scrollbar=True,
-        border=False,
-    ), dpg.group(horizontal=True):
+    with (
+        dpg.child_window(
+            height=HEADER_HEIGHT - PADDING_MEDIUM,
+            no_scrollbar=True,
+            border=False,
+        ),
+        dpg.group(horizontal=True),
+    ):
         # Left side: Logo
         with dpg.group():
             dpg.add_spacer(height=PADDING_LARGE)
@@ -140,12 +143,15 @@ def _build_header(container: ServiceContainer) -> None:
         dpg.add_spacer(width=PADDING_LARGE * 3)
 
         # Right side: Active profile card
-        with dpg.child_window(
-            tag=TAGS["active_profile_card"],
-            width=400,
-            height=HEADER_HEIGHT - PADDING_LARGE * 2,
-            border=True,
-        ), dpg.group(horizontal=True):
+        with (
+            dpg.child_window(
+                tag=TAGS["active_profile_card"],
+                width=400,
+                height=HEADER_HEIGHT - PADDING_LARGE * 2,
+                border=True,
+            ),
+            dpg.group(horizontal=True),
+        ):
             # Profile info
             with dpg.group():
                 dpg.add_text(
@@ -287,11 +293,14 @@ def _build_footer(container: ServiceContainer) -> None:
     Args:
         container: Service container for status information.
     """
-    with dpg.child_window(
-        height=FOOTER_HEIGHT,
-        no_scrollbar=True,
-        border=False,
-    ), dpg.group(horizontal=True):
+    with (
+        dpg.child_window(
+            height=FOOTER_HEIGHT,
+            no_scrollbar=True,
+            border=False,
+        ),
+        dpg.group(horizontal=True),
+    ):
         # SSH status
         dpg.add_text(
             "SSH:",

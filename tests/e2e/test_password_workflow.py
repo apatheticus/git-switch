@@ -96,9 +96,7 @@ class TestPasswordWorkflow:
         assert e2e_session_manager.is_unlocked is True
         assert e2e_session_manager.encryption_key is not None
 
-    def test_unlock_with_wrong_password_rejected(
-        self, e2e_session_manager: SessionManager
-    ) -> None:
+    def test_unlock_with_wrong_password_rejected(self, e2e_session_manager: SessionManager) -> None:
         """Wrong password should be rejected, correct password should work."""
         # Setup password first
         e2e_session_manager.setup_master_password("CorrectPassword!")
